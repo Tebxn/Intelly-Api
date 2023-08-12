@@ -29,7 +29,7 @@ Promotional Emails Module:
 - [@Tebxn](https://www.github.com/Tebxn)
 - [@Sharon-MN](https://www.github.com/Sharon-MN)
 - [@Valeriaalif](https://www.github.com/valeriaalif)
-- [@Gabriel](https://www.github.com/Gabriel)
+- [@Gaboo-H](https://www.github.com/Gaboo-H)
 
 
 ## License
