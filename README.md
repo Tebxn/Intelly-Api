@@ -26,10 +26,10 @@ Promotional Emails Module:
 
 ## Authors
 
-- [@Tebxn](https://www.github.com/Tebxn)
-- [@Sharon-MN](https://www.github.com/Sharon-MN)
-- [@Valeriaalif](https://www.github.com/valeriaalif)
-- [@Gaboo-H](https://www.github.com/Gaboo-H)
+- [@Tebxn] (https://www.github.com/Tebxn)
+- [@Sharon-MN] (https://www.github.com/Sharon-MN)
+- [@Valeriaalif] (https://www.github.com/valeriaalif)
+- [@Gaboo-H] (https://www.github.com/Gaboo-H)
 
 
 ## License
