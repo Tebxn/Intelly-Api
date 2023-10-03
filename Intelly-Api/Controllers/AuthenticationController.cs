@@ -20,15 +20,15 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
-        [Route("IniciarSesion")]
-        public IActionResult IniciarSesion(UserEnt entity)
+        [Route("Login")]
+        public IActionResult Login(UserEnt entity)
         {
             try
             {
                 using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    var data = context.Query<UserEnt>("IniciarSesion",
-                        new { entity.User_Id, entity.User_Email, entity.User_Password },
+                    var data = context.Query<UserEnt>("Login",
+                        new { entity.User_Email, entity.User_Password },
                         commandType: CommandType.StoredProcedure).FirstOrDefault();
 
                     return Ok(data);
@@ -41,15 +41,15 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
-        [Route("RegistrarCuenta")]
-        public IActionResult RegistrarCuenta(UserEnt entity)
+        [Route("RegisterAccount")]
+        public IActionResult RegisterAccount(UserEnt entity)
         {
             try
             {
                 using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    var data = context.Execute("RegistrarCuenta",
-                        new { entity.User_Id, entity.User_Name, entity.User_Email, entity.User_Password, entity.User_State },
+                    var data = context.Execute("RegisterAccount",
+                        new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
                     return Ok(data);
@@ -62,14 +62,14 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
-        [Route("RecuperarCuenta")]
-        public IActionResult RecuperarCuenta(UserEnt entity)
+        [Route("RecoverAccount")]
+        public IActionResult RecoverAccount(UserEnt entity)
         {
             try
             {
                 using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    var data = context.Query<UserEnt>("RecuperarCuenta",
+                    var data = context.Query<UserEnt>("RecoverAccount",
                         new { entity.User_Email },
                         commandType: CommandType.StoredProcedure).FirstOrDefault();
 
