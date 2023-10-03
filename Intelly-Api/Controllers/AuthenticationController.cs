@@ -10,22 +10,70 @@ namespace Intelly_Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class LoginController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
+
+        public LoginController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [HttpPost]
-        [Route("SignIn")]
-        public async Task<IActionResult> SignIn(UserEnt entity)
+        [Route("IniciarSesion")]
+        public IActionResult IniciarSesion(UserEnt entity)
         {
             try
             {
-                using (var context = new SqlConnection("Server=DESKTOP-0EDQFH8\\SQLEXPRESS;Database=Intelly_DB;Trusted_Connection=True MultipleActiveResultSets=true;"))
+                using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    var data = await context.QueryAsync<UserEnt>(
-                        "SignIn",
-                        new { entity.User_Email, entity.User_Password },
-                        commandType: CommandType.StoredProcedure
-                    );
-                    return Ok(data.FirstOrDefault());
+                    var data = context.Query<UserEnt>("IniciarSesion",
+                        new { entity.User_Id, entity.User_Email, entity.User_Password },
+                        commandType: CommandType.StoredProcedure).FirstOrDefault();
+
+                    return Ok(data);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("RegistrarCuenta")]
+        public IActionResult RegistrarCuenta(UserEnt entity)
+        {
+            try
+            {
+                using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    var data = context.Execute("RegistrarCuenta",
+                        new { entity.User_Id, entity.User_Name, entity.User_Email, entity.User_Password, entity.User_State },
+                        commandType: CommandType.StoredProcedure);
+
+                    return Ok(data);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("RecuperarCuenta")]
+        public IActionResult RecuperarCuenta(UserEnt entity)
+        {
+            try
+            {
+                using (var context = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    var data = context.Query<UserEnt>("RecuperarCuenta",
+                        new { entity.User_Email },
+                        commandType: CommandType.StoredProcedure).FirstOrDefault();
+
+                    return Ok(data);
                 }
             }
             catch (Exception ex)
