@@ -123,7 +123,31 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("DisableAccount")]
+        public IActionResult DisableAccount(UserEnt entity)
+        {
+            try
+            {
+                if (entity.User_Id == 0)
+                {
+                    return BadRequest("User_Id can't be empty.");
+                }
 
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = context.QueryFirstOrDefault<UserEnt>("DisableAccount",
+                        new { entity.User_Id },
+                        commandType: CommandType.StoredProcedure);
+
+                    return Ok("Success");
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest("Unespected Error: " + ex.Message);
+            }
+        }
     }
 }
 
