@@ -5,6 +5,8 @@ using System.Data;
 using System.Data.SqlClient;
 using Intelly_Api.Entities;
 using Microsoft.AspNetCore.Hosting.Server;
+using Org.BouncyCastle.Cms;
+using Intelly_Api.Tools;
 
 namespace Intelly_Api.Controllers
 {
@@ -13,6 +15,7 @@ namespace Intelly_Api.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private EmailTools emailTools;
 
         public LoginController(IConfiguration configuration)
         {
@@ -72,6 +75,13 @@ namespace Intelly_Api.Controllers
                     var data = context.Query<UserEnt>("RecoverAccount",
                         new { entity.User_Email },
                         commandType: CommandType.StoredProcedure).FirstOrDefault();
+                    if(data != null)
+                    {
+                        //need to update these logic
+                        string body = "Your new password is: 1234";
+                        string recipient = entity.User_Email;
+                        emailTools.SendEmail(recipient, "Intelly Recover Account", body);
+                    }
 
                     return Ok(data);
                 }
