@@ -77,7 +77,16 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    return Ok("Success");
+                    if (data != null)
+                    {
+                        string body = "Your new password to access Intelly CRM is: " + entity.User_Password +
+                            "\nPlease log in with your new password and change it.";
+                        string recipient = entity.User_Email;
+                        _tools.SendEmail(recipient, "Intelly Recover Account", body);
+
+                        return Ok("Success");
+                    }
+                    else return BadRequest("Error Sending email");
                 }
             }
             catch (SqlException ex)
@@ -111,9 +120,10 @@ namespace Intelly_Api.Controllers
                             "\nPlease log in with your new password and change it.";
                         string recipient = entity.User_Email;
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
-                    }
 
-                    return Ok("Success");
+                        return Ok("Success");
+                    }
+                    else return BadRequest("Error Sending email");
                 }
             }
             catch (SqlException ex)

@@ -30,8 +30,9 @@ namespace Intelly_Api.Implementations
         public void SendEmail(string recipient, string subject, string body)
         {
             var message = new MimeMessage();
-            string emailSender = _configuration.GetConnectionString("EmailAddress");
-            message.From.Add(new MailboxAddress("Intelly TI Support", "esanchez50184@ufide.ac.cr"));//cambiar por variables en configuracion
+            string emailSender = _configuration["Email:SenderAddress"];
+            string emailSenderPassword = _configuration["Email:SenderPassword"];
+            message.From.Add(new MailboxAddress("Intelly TI Support", emailSender));//check this logic method is not sending emails
             message.To.Add(new MailboxAddress("Recipient", recipient));
             message.Subject = subject;
 
@@ -43,7 +44,7 @@ namespace Intelly_Api.Implementations
             using (var client = new SmtpClient())
             {
                 client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("esanchez50184@ufide.ac.cr", "3$t3B4n0903@");//cambiar por variables en configuracion
+                client.Authenticate(emailSender, emailSenderPassword);//cambiar por variables en configuracion
                 client.Send(message);
                 client.Disconnect(true);
             }
