@@ -60,7 +60,7 @@ namespace Intelly_Api.Controllers
 
         [HttpPost]
         [Route("RegisterAccount")]
-        public IActionResult RegisterAccount(UserEnt entity)
+        public async Task<IActionResult> RegisterAccount(UserEnt entity)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = context.Execute("RegisterAccount",
+                    var data = await context.ExecuteAsync("RegisterAccount",
                         new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
@@ -82,14 +82,13 @@ namespace Intelly_Api.Controllers
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unespected Error: " + ex.Message);
+                return BadRequest("Unexpected Error: " + ex.Message);
             }
         }
 
-
         [HttpPost]
         [Route("RecoverAccount")]
-        public IActionResult RecoverAccount(UserEnt entity)
+        public async Task<IActionResult> RecoverAccount(UserEnt entity)
         {
             try
             {
@@ -102,13 +101,13 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = context.QueryFirstOrDefault<UserEnt>("RecoverAccount",
-                        new { entity.User_Email, temporalPassword},
+                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("RecoverAccount",
+                        new { entity.User_Email, TemporalPassword = temporalPassword }, // Cambiado para incluir la temporalPassword
                         commandType: CommandType.StoredProcedure);
 
                     if (data != null)
                     {
-                        string body = "Your new password to acces Intelly CRM is: " + temporalPassword + 
+                        string body = "Your new password to access Intelly CRM is: " + temporalPassword +
                             "\nPlease log in with your new password and change it.";
                         string recipient = entity.User_Email;
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
@@ -119,13 +118,13 @@ namespace Intelly_Api.Controllers
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unespected Error: " + ex.Message);
+                return BadRequest("Unexpected Error: " + ex.Message);
             }
         }
 
         [HttpPut]
         [Route("DisableAccount")]
-        public IActionResult DisableAccount(UserEnt entity)
+        public async Task<IActionResult> DisableAccount(UserEnt entity)
         {
             try
             {
@@ -136,7 +135,7 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = context.QueryFirstOrDefault<UserEnt>("DisableAccount",
+                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("DisableAccount",
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
@@ -145,9 +144,36 @@ namespace Intelly_Api.Controllers
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unespected Error: " + ex.Message);
+                return BadRequest("Unexpected Error: " + ex.Message);
             }
         }
+
+        [HttpPut]
+        [Route("ActivateAccount")]
+        public async Task<IActionResult> ActivateAccount(UserEnt entity)
+        {
+            try
+            {
+                if (entity.User_Id == 0)
+                {
+                    return BadRequest("User_Id can't be empty.");
+                }
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("ActivateAccount",
+                        new { entity.User_Id },
+                        commandType: CommandType.StoredProcedure);
+
+                    return Ok("Success");
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest("Unexpected Error: " + ex.Message);
+            }
+        }
+
     }
 }
 
