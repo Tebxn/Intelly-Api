@@ -22,13 +22,13 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [Route("GetAllUsers")]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var users = context.Query<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
+                    var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
                     return Ok(users);
                 }
             }
@@ -37,6 +37,60 @@ namespace Intelly_Api.Controllers
                 return BadRequest("Unexpected Error: " + ex.Message);
             }
         }
+
+        [HttpGet]
+        [Route("GetSpecificUser/{UserId}")]
+        public async Task<IActionResult> GetSpecificUser(int UserId)
+        {
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser",
+                        new { UserId }, commandType: CommandType.StoredProcedure);
+
+                    if (user != null)
+                    {
+                        return Ok(user);
+                    }
+                    else
+                    {
+                        return NotFound("User not found");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest("Unexpected Error: " + ex.Message);
+            }
+        }
+        [HttpPut]
+        [Route("EditSpecificUser")]
+        public async Task<IActionResult> EditSpecificUser(UserEnt entity)
+        {
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("EditSpecificUser",
+                        new { entity.User_Id }, commandType: CommandType.StoredProcedure);
+
+                    if (user != null)
+                    {
+                        return Ok(user);
+                    }
+                    else
+                    {
+                        return NotFound("User not found");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest("Unexpected Error: " + ex.Message);
+            }
+        }
+
 
     }
 }
