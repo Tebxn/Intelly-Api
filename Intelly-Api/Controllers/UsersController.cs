@@ -91,6 +91,23 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetAllUsersRoles")]
+        public async Task<IActionResult> GetAllUsersRoles()
+        {
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.QueryAsync<UserRoleEnt>("GetAllUsersRoles", commandType: CommandType.StoredProcedure);
+                    return Ok(data);
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest("Unexpected Error: " + ex.Message);
+            }
+        }
 
     }
 }
