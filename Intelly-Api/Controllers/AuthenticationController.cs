@@ -97,7 +97,7 @@ namespace Intelly_Api.Controllers
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
 
                         response.Success = true;
-                        response.Data = "Success";
+                        response.Code = 200;
                         return Ok(response);
                     }
                     else
@@ -147,7 +147,7 @@ namespace Intelly_Api.Controllers
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
 
                         response.Success = true;
-                        response.Data = "Success";
+                        response.Code = 200;
                         return Ok(response);
                     }
                     else
@@ -188,7 +188,7 @@ namespace Intelly_Api.Controllers
                         commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
-                    response.Data = "Success";
+                    response.Code = 200;
                     return Ok(response);
                 }
             }
@@ -217,12 +217,12 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("ActivateAccount",
+                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("ActivatedAccount",
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
-                    response.Data = "Success";
+                    response.Code = 200;
                     return Ok(response);
                 }
             }

@@ -25,17 +25,25 @@ namespace Intelly_Api.Controllers
         [Route("GetAllCompanies")]
         public async Task<IActionResult> GetAllCompanies()
         {
+            ApiResponse<List<CompanyEnt>> response = new ApiResponse<List<CompanyEnt>>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var companiesData = await context.QueryAsync<CompanyEnt>("GetAllCompanies", commandType: CommandType.StoredProcedure);
-                    return Ok(companiesData);
+
+                    response.Success = true;
+                    response.Data = companiesData.ToList();
+
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -43,6 +51,8 @@ namespace Intelly_Api.Controllers
         [Route("GetSpecificCompany/{CompanyId}")]
         public async Task<IActionResult> GetSpecificCompany(long CompanyId)
         {
+            ApiResponse<CompanyEnt> response = new ApiResponse<CompanyEnt>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
@@ -52,17 +62,26 @@ namespace Intelly_Api.Controllers
 
                     if (companyData != null)
                     {
-                        return Ok(companyData);
+                        response.Success = true;
+                        response.Data = companyData;
+
+                        return Ok(response);
                     }
                     else
                     {
-                        return NotFound("Company not found");
+                        response.ErrorMessage = "Company not found";
+                        response.Code = 404;
+
+                        return NotFound(response);
                     }
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+
+                return BadRequest(response);
             }
         }
 
@@ -70,37 +89,40 @@ namespace Intelly_Api.Controllers
         [Route("CreateCompany")]
         public async Task<IActionResult> CreateCompany(CompanyEnt entity)
         {
+            ApiResponse<string> response = new ApiResponse<string>();
+
             try
             {
                 if (string.IsNullOrEmpty(entity.Company_Name) || string.IsNullOrEmpty(entity.Company_Email) || string.IsNullOrEmpty(entity.Company_Phone))
                 {
-                    return BadRequest("Name, email and phone are required.");
+                    response.ErrorMessage = "Name, email and phone are required.";
+                    response.Code = 400;
+
+                    return BadRequest(response);
                 }
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    string connectionString = "";
-
-                    if (string.IsNullOrEmpty(entity.Company_Connection_String))
-                    {
-                         connectionString = "waiting to be defined";
-                    }
-                    else
-                    {
-                        connectionString = entity.Company_Connection_String;
-                    } 
+                    string connectionString = string.IsNullOrEmpty(entity.Company_Connection_String) ? "waiting to be defined" : entity.Company_Connection_String;
 
                     var data = await context.ExecuteAsync("CreateCompany",
-                        new { entity.Company_Name, entity.Company_Email, entity.Company_Phone, connectionString},
+                        new { entity.Company_Name, entity.Company_Email, entity.Company_Phone, connectionString },
                         commandType: CommandType.StoredProcedure);
 
-                        return Ok("Success");
+                    response.Success = true;
+                    response.Data = "Success";
+
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+
+                return BadRequest(response);
             }
         }
+
     }
 }
