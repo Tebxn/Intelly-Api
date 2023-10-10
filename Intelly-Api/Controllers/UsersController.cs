@@ -24,17 +24,24 @@ namespace Intelly_Api.Controllers
         [Route("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
+            ApiResponse<List<UserEnt>> response = new ApiResponse<List<UserEnt>>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
-                    return Ok(users);
+
+                    response.Success = true;
+                    response.Data = users.ToList();
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -42,6 +49,8 @@ namespace Intelly_Api.Controllers
         [Route("GetSpecificUser/{UserId}")]
         public async Task<IActionResult> GetSpecificUser(int UserId)
         {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
@@ -51,23 +60,32 @@ namespace Intelly_Api.Controllers
 
                     if (user != null)
                     {
-                        return Ok(user);
+                        response.Success = true;
+                        response.Data = user;
+                        return Ok(response);
                     }
                     else
                     {
-                        return NotFound("User not found");
+                        response.ErrorMessage = "User not found";
+                        response.Code = 404;
+                        return NotFound(response);
                     }
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
+
         [HttpPut]
         [Route("EditSpecificUser")]
         public async Task<IActionResult> EditSpecificUser(UserEnt entity)
         {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
@@ -77,17 +95,23 @@ namespace Intelly_Api.Controllers
 
                     if (user != null)
                     {
-                        return Ok(user);
+                        response.Success = true;
+                        response.Data = user;
+                        return Ok(response);
                     }
                     else
                     {
-                        return NotFound("User not found");
+                        response.ErrorMessage = "User not found";
+                        response.Code = 404;
+                        return NotFound(response);
                     }
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -95,19 +119,26 @@ namespace Intelly_Api.Controllers
         [Route("GetAllUsersRoles")]
         public async Task<IActionResult> GetAllUsersRoles()
         {
+            ApiResponse<List<UserRoleEnt>> response = new ApiResponse<List<UserRoleEnt>>();
+
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.QueryAsync<UserRoleEnt>("GetAllUsersRoles", commandType: CommandType.StoredProcedure);
-                    return Ok(data);
+                    response.Success = true;
+                    response.Data = data.ToList();
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
+
 
     }
 }

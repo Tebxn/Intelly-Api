@@ -30,11 +30,15 @@ namespace Intelly_Api.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login(UserEnt entity)
         {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
             try
             {
                 if (string.IsNullOrEmpty(entity.User_Email) || string.IsNullOrEmpty(entity.User_Password))
                 {
-                    return BadRequest("Email and password are required");
+                    response.ErrorMessage = "Email and password are required";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
 
                 using (var connection = _connectionProvider.GetConnection())
@@ -45,28 +49,36 @@ namespace Intelly_Api.Controllers
 
                     if (data == null)
                     {
-                        return NotFound("Email or password incorrect");
+                        response.ErrorMessage = "Incorrect email or password";
+                        response.Code = 404;
+                        return NotFound(response);
                     }
 
-                    return Ok(data);
+                    response.Success = true;
+                    response.Data = data;
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unespected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                return BadRequest(response);
             }
         }
-
 
         [HttpPost]
         [Route("RegisterAccount")]
         public async Task<IActionResult> RegisterAccount(UserEnt entity)
         {
+            ApiResponse<string> response = new ApiResponse<string>();
+
             try
             {
                 if (string.IsNullOrEmpty(entity.User_Name) || string.IsNullOrEmpty(entity.User_LastName) || string.IsNullOrEmpty(entity.User_Email))
                 {
-                    return BadRequest("Name, lastname, email are required.");
+                    response.ErrorMessage = "Name, lastname, and email are required.";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
 
                 entity.User_Password = _tools.CreatePassword(8);
@@ -84,14 +96,23 @@ namespace Intelly_Api.Controllers
                         string recipient = entity.User_Email;
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
 
-                        return Ok("Success");
+                        response.Success = true;
+                        response.Data = "Success";
+                        return Ok(response);
                     }
-                    else return BadRequest("Error Sending email");
+                    else
+                    {
+                        response.ErrorMessage = "Error Sending email";
+                        response.Code = 500;
+                        return BadRequest(response);
+                    }
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -99,11 +120,15 @@ namespace Intelly_Api.Controllers
         [Route("RecoverAccount")]
         public async Task<IActionResult> RecoverAccount(UserEnt entity)
         {
+            ApiResponse<string> response = new ApiResponse<string>();
+
             try
             {
                 if (string.IsNullOrEmpty(entity.User_Email))
                 {
-                    return BadRequest("Email is required.");
+                    response.ErrorMessage = "Email is required.";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
 
                 string temporalPassword = _tools.CreatePassword(8);
@@ -111,7 +136,7 @@ namespace Intelly_Api.Controllers
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.QueryFirstOrDefaultAsync<UserEnt>("RecoverAccount",
-                        new { entity.User_Email, TemporalPassword = temporalPassword }, // Cambiado para incluir la temporalPassword
+                        new { entity.User_Email, TemporalPassword = temporalPassword },
                         commandType: CommandType.StoredProcedure);
 
                     if (data != null)
@@ -121,14 +146,23 @@ namespace Intelly_Api.Controllers
                         string recipient = entity.User_Email;
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
 
-                        return Ok("Success");
+                        response.Success = true;
+                        response.Data = "Success";
+                        return Ok(response);
                     }
-                    else return BadRequest("Error Sending email");
+                    else
+                    {
+                        response.ErrorMessage = "Error Sending email";
+                        response.Code = 500;
+                        return BadRequest(response);
+                    }
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -136,11 +170,15 @@ namespace Intelly_Api.Controllers
         [Route("DisableAccount")]
         public async Task<IActionResult> DisableAccount(UserEnt entity)
         {
+            ApiResponse<string> response = new ApiResponse<string>();
+
             try
             {
                 if (entity.User_Id == 0)
                 {
-                    return BadRequest("User_Id can't be empty.");
+                    response.ErrorMessage = "User_Id can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
 
                 using (var context = _connectionProvider.GetConnection())
@@ -149,12 +187,16 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    return Ok("Success");
+                    response.Success = true;
+                    response.Data = "Success";
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
 
@@ -162,11 +204,15 @@ namespace Intelly_Api.Controllers
         [Route("ActivateAccount")]
         public async Task<IActionResult> ActivateAccount(UserEnt entity)
         {
+            ApiResponse<string> response = new ApiResponse<string>();
+
             try
             {
                 if (entity.User_Id == 0)
                 {
-                    return BadRequest("User_Id can't be empty.");
+                    response.ErrorMessage = "User_Id can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
 
                 using (var context = _connectionProvider.GetConnection())
@@ -175,14 +221,19 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    return Ok("Success");
+                    response.Success = true;
+                    response.Data = "Success";
+                    return Ok(response);
                 }
             }
             catch (SqlException ex)
             {
-                return BadRequest("Unexpected Error: " + ex.Message);
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
             }
         }
+
 
     }
 }
