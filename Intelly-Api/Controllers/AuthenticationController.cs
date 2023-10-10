@@ -77,7 +77,7 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    if (data != null)
+                    if (data != 0)
                     {
                         string body = "Your new password to access Intelly CRM is: " + entity.User_Password +
                             "\nPlease log in with your new password and change it.";
