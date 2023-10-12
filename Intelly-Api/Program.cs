@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
 builder.Services.AddSingleton<ITools, Tools>();
+builder.Services.AddSingleton<IBCryptHelper, BCryptHelper>();
 
 var app = builder.Build();
 

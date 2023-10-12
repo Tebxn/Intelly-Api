@@ -9,6 +9,8 @@ using Org.BouncyCastle.Cms;
 using Intelly_Api.Interfaces;
 using Intelly_Api.Implementations;
 using System.Data.Common;
+using BCrypt.Net;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Intelly_Api.Controllers
 {
@@ -19,11 +21,13 @@ namespace Intelly_Api.Controllers
 
         private readonly IDbConnectionProvider _connectionProvider;
         private readonly ITools _tools;
+        private readonly IBCryptHelper _bCryptHelper;
 
-        public AuthenticationController(IDbConnectionProvider connectionProvider, ITools tools)
+        public AuthenticationController(IDbConnectionProvider connectionProvider, ITools tools, IBCryptHelper bCryptHelper)
         {
             _connectionProvider = connectionProvider;
             _tools = tools;
+            _bCryptHelper = bCryptHelper;
         }
 
         [HttpPost]
@@ -44,10 +48,13 @@ namespace Intelly_Api.Controllers
                 using (var connection = _connectionProvider.GetConnection())
                 {
                     var data = await connection.QueryFirstOrDefaultAsync<UserEnt>("Login",
-                        new { entity.User_Email, entity.User_Password },
+                        new { entity.User_Email},
                         commandType: CommandType.StoredProcedure);
 
-                    if (data == null)
+                    //Check password
+                    bool validPassword = _bCryptHelper.CheckPassword(entity.User_Password, data.User_Password);
+
+                    if (data == null || !validPassword)
                     {
                         response.ErrorMessage = "Incorrect email or password";
                         response.Code = 404;
@@ -81,7 +88,10 @@ namespace Intelly_Api.Controllers
                     return BadRequest(response);
                 }
 
-                entity.User_Password = _tools.CreatePassword(8);
+                //HashRandomPassword
+                var randomPassword = _tools.CreatePassword(8);
+                var hashedPassword = _bCryptHelper.HashPassword(randomPassword);
+                entity.User_Password = hashedPassword;
 
                 using (var context = _connectionProvider.GetConnection())
                 {
@@ -91,10 +101,10 @@ namespace Intelly_Api.Controllers
 
                     if (data != 0)
                     {
-                        string body = "Your new password to access Intelly CRM is: " + entity.User_Password +
+                        string body = "Your new password to access Intelly CRM is: " + randomPassword +
                             "\nPlease log in with your new password and change it.";
                         string recipient = entity.User_Email;
-                        _tools.SendEmail(recipient, "Intelly Recover Account", body);
+                        _tools.SendEmail(recipient, "Intelly New Account", body);
 
                         response.Success = true;
                         response.Code = 200;

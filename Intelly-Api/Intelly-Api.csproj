@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
     <PackageReference Include="Dapper" Version="2.1.4" />
     <PackageReference Include="MailKit" Version="4.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
