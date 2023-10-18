@@ -124,5 +124,73 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("DisableCompany")] //Need SP
+        public async Task<IActionResult> DisableCompany(CompanyEnt entity)
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+
+            try
+            {
+                if (entity.Company_Id == 0)
+                {
+                    response.ErrorMessage = "Company Id can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("DisableCompany",
+                        new { entity.Company_Id},
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Code = 200;
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        [Route("ActivateCompany")] //Need SP
+        public async Task<IActionResult> ActivateCompany(CompanyEnt entity)
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+
+            try
+            {
+                if (entity.Company_Id == 0)
+                {
+                    response.ErrorMessage = "Company Id can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("ActivateCompany",
+                        new { entity.Company_Id },
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Code = 200;
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
     }
 }

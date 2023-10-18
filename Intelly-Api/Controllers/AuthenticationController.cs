@@ -193,7 +193,7 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("DisableAccount",
+                    var data = await context.ExecuteAsync("DisableAccount",
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
@@ -227,8 +227,9 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("ActivatedAccount",
-                        new { entity.User_Id },
+                
+                    var data = await context.ExecuteAsync("ActivateAccount",
+                        new { entity.User_Id},
                         commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
