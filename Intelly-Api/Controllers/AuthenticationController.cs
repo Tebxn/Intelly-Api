@@ -99,7 +99,7 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    if (data != 0)
+                    if (data > 0)
                     {
                         string body = "Your new password to access Intelly CRM is: " + randomPassword +
                             "\nPlease log in with your new password and change it.";
@@ -197,9 +197,18 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    response.Success = true;
-                    response.Code = 200;
-                    return Ok(response);
+                    if (data > 0) 
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Code = 500;
+                        response.ErrorMessage = "Error disabling account";
+                        return BadRequest(response);
+                    }  
                 }
             }
             catch (SqlException ex)
@@ -232,9 +241,18 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id},
                         commandType: CommandType.StoredProcedure);
 
-                    response.Success = true;
-                    response.Code = 200;
-                    return Ok(response);
+                    if (data > 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Code = 500;
+                        response.ErrorMessage = "Error activating account";
+                        return BadRequest(response);
+                    }
                 }
             }
             catch (SqlException ex)
@@ -268,9 +286,18 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id, hashedPassword},
                         commandType: CommandType.StoredProcedure);
 
-                    response.Success = true;
-                    response.Code = 200;
-                    return Ok(response);
+                    if (data != null)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Code = 500;
+                        response.ErrorMessage = "Error updating password";
+                        return BadRequest(response);
+                    }
                 }
             }
             catch (SqlException ex)
