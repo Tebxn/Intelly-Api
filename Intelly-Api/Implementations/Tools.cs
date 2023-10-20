@@ -27,28 +27,39 @@ namespace Intelly_Api.Implementations
             return res.ToString();
         }
 
-        public void SendEmail(string recipient, string subject, string body)
+        public bool SendEmail(string recipient, string subject, string body)
         {
-            var message = new MimeMessage();
-            string emailSender = _configuration["Email:SenderAddress"];
-            string emailSenderPassword = _configuration["Email:SenderPassword"];
-            message.From.Add(new MailboxAddress("Intelly TI Support", emailSender));//check this logic method is not sending emails
-            message.To.Add(new MailboxAddress("Recipient", recipient));
-            message.Subject = subject;
-
-            message.Body = new TextPart("plain")
+            try
             {
-                Text = body
-            };
+                var message = new MimeMessage();
+                string emailSender = _configuration["Email:SenderAddress"];
+                string emailSenderPassword = _configuration["Email:SenderPassword"];
+                message.From.Add(new MailboxAddress("Intelly TI Support", emailSender));
+                message.To.Add(new MailboxAddress("Recipient", recipient));
+                message.Subject = subject;
 
-            using (var client = new SmtpClient())
+                message.Body = new TextPart("plain")
+                {
+                    Text = body
+                };
+
+                using (var client = new SmtpClient())
+                {
+                    client.Connect("smtp.office365.com", 587, false);
+                    client.Authenticate(emailSender, emailSenderPassword);
+                    client.Send(message);
+                    client.Disconnect(true);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
             {
-                client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate(emailSender, emailSenderPassword);//cambiar por variables en configuracion
-                client.Send(message);
-                client.Disconnect(true);
+                
+                return false;
             }
         }
+
     }
 
 }

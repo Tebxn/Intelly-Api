@@ -95,22 +95,31 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.ExecuteAsync("RegisterAccount",
+                    string body = "Your new password to access Intelly CRM is: " + randomPassword +
+                    "\nPlease log in with your new password and change it.";
+                    string recipient = entity.User_Email;
+
+                    bool emailIsSend = _tools.SendEmail(recipient, "Intelly New Account", body);
+                    if (emailIsSend)
+                    {
+                        var data = await context.ExecuteAsync("RegisterAccount",
                         new { entity.User_Name, entity.User_LastName, entity.User_Email, entity.User_Password, entity.User_Type, entity.User_State, entity.User_Company_Id },
                         commandType: CommandType.StoredProcedure);
 
-                    if (data > 0)
-                    {
-                        string body = "Your new password to access Intelly CRM is: " + randomPassword +
-                            "\nPlease log in with your new password and change it.";
-                        string recipient = entity.User_Email;
-                        _tools.SendEmail(recipient, "Intelly New Account", body);
-
-                        response.Success = true;
-                        response.Code = 200;
-                        return Ok(response);
+                        if (data != 0)
+                        {
+                            response.Success = true;
+                            response.Code = 200;
+                            return Ok(response);
+                        }
+                        else
+                        {
+                            response.ErrorMessage = "Error saving new user";
+                            response.Code = 500;
+                            return BadRequest(response);
+                        }
                     }
-                    else
+                    else 
                     {
                         response.ErrorMessage = "Error Sending email";
                         response.Code = 500;
