@@ -90,13 +90,21 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("EditSpecificUser",
-                        new { entity.User_Id }, commandType: CommandType.StoredProcedure);
+                    var data = await context.ExecuteAsync("EditSpecificUser",
+                        new {
+                            entity.User_Id,
+                            entity.User_Company_Id,
+                            entity.User_Name,
+                            entity.User_LastName,
+                            entity.User_Email,
+                            entity.User_Type
+                        },
+                        commandType: CommandType.StoredProcedure);
 
-                    if (user != null)
+                    if (data > 0)
                     {
                         response.Success = true;
-                        response.Data = user;
+                        response.Code = 200;
                         return Ok(response);
                     }
                     else
