@@ -11,7 +11,6 @@
         public int User_Type { get; set;}
         public bool User_State { get; set; }
         public bool User_Password_IsTemp { get; set; }
-        public string User_Type_Name { get; set; }
-        public string User_Company_Name { get; set; }
+  
     }
 }

@@ -230,13 +230,13 @@ namespace Intelly_Api.Controllers
 
         [HttpPut]
         [Route("ActivateAccount")]
-        public async Task<IActionResult> ActivateAccount(UserEnt entity)
+        public async Task<IActionResult> ActivateAccount(int User_Id)
         {
             ApiResponse<string> response = new ApiResponse<string>();
 
             try
             {
-                if (entity.User_Id == 0)
+                if (User_Id == 0)
                 {
                     response.ErrorMessage = "User_Id can't be empty.";
                     response.Code = 400;
@@ -245,9 +245,8 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                
                     var data = await context.ExecuteAsync("ActivateAccount",
-                        new { entity.User_Id},
+                        new { User_Id = User_Id },
                         commandType: CommandType.StoredProcedure);
 
                     if (data > 0)
@@ -271,6 +270,7 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
 
         [HttpPut]
         [Route("UpdateUserPassword")]
