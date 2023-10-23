@@ -103,10 +103,9 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    string connectionString = string.IsNullOrEmpty(entity.Company_Connection_String) ? "waiting to be defined" : entity.Company_Connection_String;
 
                     var data = await context.ExecuteAsync("CreateCompany",
-                        new { entity.Company_Name, entity.Company_Email, entity.Company_Phone, connectionString },
+                        new { entity.Company_Name, entity.Company_Email, entity.Company_Phone},
                         commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
