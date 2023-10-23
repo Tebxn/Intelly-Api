@@ -147,6 +147,5 @@ namespace Intelly_Api.Controllers
             }
         }
 
-
     }
 }
