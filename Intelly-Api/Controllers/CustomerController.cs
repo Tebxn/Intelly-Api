@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Intelly_Api.Interfaces;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intelly_Api.Controllers
 {
@@ -21,6 +22,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetAllCustomers/{CompanyId}")] //Get all cutomers from x company, please provide company id
         public async Task<IActionResult> GetAllCustomers(long companyId)
         {
@@ -56,6 +58,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("NewCustomer")]
         public async Task<IActionResult> NewCustomer(CustomerEnt entity) //Need SP
         {
@@ -92,6 +95,7 @@ namespace Intelly_Api.Controllers
             }
         }
         [HttpGet]
+        [Authorize]
         [Route("GetSpecificCustomer/{CompanyId}/{UserId}")]
         public async Task<IActionResult> GetSpecificCustumer(long companyId, long userId)
         {

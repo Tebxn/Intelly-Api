@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intelly_Api.Controllers
 {
@@ -21,6 +22,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -46,6 +48,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetSpecificUser/{UserId}")]
         public async Task<IActionResult> GetSpecificUser(int UserId)
         {
@@ -81,6 +84,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("EditSpecificUser")]
         public async Task<IActionResult> EditSpecificUser(UserEnt entity)
         {
@@ -124,6 +128,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetAllUsersRoles")]
         public async Task<IActionResult> GetAllUsersRoles()
         {

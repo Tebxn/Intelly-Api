@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Intelly_Api.Interfaces;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intelly_Api.Controllers
 {
@@ -24,6 +25,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("EmailMarketingManual")]
         public async Task<IActionResult> EmailMarketingManual(EmailEnt entity)
         {

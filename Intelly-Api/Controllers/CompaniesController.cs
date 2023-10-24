@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.ComponentModel.Design;
 using Intelly_Api.Implementations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intelly_Api.Controllers
 {
@@ -22,6 +23,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetAllCompanies")]
         public async Task<IActionResult> GetAllCompanies()
         {
@@ -48,6 +50,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetSpecificCompany/{CompanyId}")]
         public async Task<IActionResult> GetSpecificCompany(long CompanyId)
         {
@@ -86,6 +89,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("CreateCompany")]
         public async Task<IActionResult> CreateCompany(CompanyEnt entity)
         {
@@ -124,6 +128,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("DisableCompany")] //Need SP
         public async Task<IActionResult> DisableCompany(CompanyEnt entity)
         {
@@ -158,6 +163,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("ActivateCompany")] //Need SP
         public async Task<IActionResult> ActivateCompany(CompanyEnt entity)
         {

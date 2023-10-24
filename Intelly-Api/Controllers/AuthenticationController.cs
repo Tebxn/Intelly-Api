@@ -11,6 +11,7 @@ using Intelly_Api.Implementations;
 using System.Data.Common;
 using BCrypt.Net;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intelly_Api.Controllers
 {
@@ -31,6 +32,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("Login")]
         public async Task<IActionResult> Login(UserEnt entity)
         {
@@ -74,6 +76,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("RegisterAccount")]
         public async Task<IActionResult> RegisterAccount(UserEnt entity)
         {
@@ -136,6 +139,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("RecoverAccount")]
         public async Task<IActionResult> RecoverAccount(UserEnt entity)
         {
@@ -186,6 +190,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("DisableAccount")]
         public async Task<IActionResult> DisableAccount(UserEnt entity)
         {
@@ -229,6 +234,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("ActivateAccount")]
         public async Task<IActionResult> ActivateAccount(int User_Id)
         {
@@ -273,6 +279,7 @@ namespace Intelly_Api.Controllers
 
 
         [HttpPut]
+        [Authorize]
         [Route("UpdateUserPassword")]
         public async Task<IActionResult> UpdateUserPassword(UserEnt entity)
         {
@@ -318,6 +325,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword(UserEnt entity)
         {
