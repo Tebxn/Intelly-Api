@@ -3,16 +3,22 @@ using Microsoft.Extensions.Configuration;
 using MimeKit;
 using System.Text;
 using MailKit.Net.Smtp;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace Intelly_Api.Implementations
 {
     public class Tools : ITools
     {
         private readonly IConfiguration _configuration;
+        private readonly IBCryptHelper _bCryptHelper;
 
-        public Tools(IConfiguration configuration)
+        public Tools(IConfiguration configuration, IBCryptHelper bCryptHelper)
         {
             _configuration = configuration;
+            _bCryptHelper = bCryptHelper;
         }
 
         public string CreatePassword(int length)
@@ -57,6 +63,76 @@ namespace Intelly_Api.Implementations
             {
                 
                 return false;
+            }
+        }
+        public string GenerateToken(string userId)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name,  Encrypt(userId))
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("8Tc2nR3QBamz1ipE3b9aYSiTPYoGXQsy"));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(30),
+                signingCredentials: cred);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string Encrypt(string texto)
+        {
+            byte[] iv = new byte[16];
+            byte[] array;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes("x3nbTRq6Jqec3lIZ");
+                aes.IV = iv;
+
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
+                        {
+                            streamWriter.Write(texto);
+                        }
+
+                        array = memoryStream.ToArray();
+                    }
+                }
+            }
+
+            return Convert.ToBase64String(array);
+        }
+
+        public string Decrypt(string texto)
+        {
+            byte[] iv = new byte[16];
+            byte[] buffer = Convert.FromBase64String(texto);
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes("x3nbTRq6Jqec3lIZ");
+                aes.IV = iv;
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream(buffer))
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))
+                        {
+                            return streamReader.ReadToEnd();
+                        }
+                    }
+                }
             }
         }
 

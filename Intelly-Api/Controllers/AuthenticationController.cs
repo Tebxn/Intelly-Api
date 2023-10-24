@@ -65,6 +65,7 @@ namespace Intelly_Api.Controllers
 
                     response.Success = true;
                     response.Data = data;
+                    response.Data.Token = _tools.GenerateToken(data.User_Id.ToString());
                     return Ok(response);
                 }
             }
