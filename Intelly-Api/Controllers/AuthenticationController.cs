@@ -317,6 +317,50 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(UserEnt entity)
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+
+            try
+            {
+                if (entity.User_Id == 0 || string.IsNullOrEmpty(entity.User_Password))
+                {
+                    response.ErrorMessage = "User_Id and new password can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
+
+                    var data = await context.ExecuteAsync("ChangePassword", //me devuelve -1
+                        new { entity.User_Id, newPassword },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (data != 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Code = 500;
+                        response.ErrorMessage = "Error changing password";
+                        return BadRequest(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
     }
 }
 
