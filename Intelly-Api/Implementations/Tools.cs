@@ -69,7 +69,7 @@ namespace Intelly_Api.Implementations
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name,  Encrypt(userId))
+                new Claim(ClaimTypes.Name, Encrypt(userId))
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("8Tc2nR3QBamz1ipE3b9aYSiTPYoGXQsy"));
@@ -77,7 +77,7 @@ namespace Intelly_Api.Implementations
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: cred);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
