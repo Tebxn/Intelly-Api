@@ -78,7 +78,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [AllowAnonymous]
         [Route("RegisterAccount")]
         public async Task<IActionResult> RegisterAccount(UserEnt entity)
         {
@@ -100,8 +100,7 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    string body = "Your new password to access Intelly CRM is: " + randomPassword +
-                    "\nPlease log in with your new password and change it.";
+                    string body = _tools.MakeHtmlNewUser(entity, randomPassword);
                     string recipient = entity.User_Email;
 
                     bool emailIsSend = _tools.SendEmail(recipient, "Intelly New Account", body);

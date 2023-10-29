@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Intelly_Api.Entities;
 
 namespace Intelly_Api.Implementations
 {
@@ -14,11 +15,13 @@ namespace Intelly_Api.Implementations
     {
         private readonly IConfiguration _configuration;
         private readonly IBCryptHelper _bCryptHelper;
+        private IHostEnvironment _hostingEnvironment;
 
-        public Tools(IConfiguration configuration, IBCryptHelper bCryptHelper)
+        public Tools(IConfiguration configuration, IBCryptHelper bCryptHelper, IHostEnvironment hostingEnvironment)
         {
             _configuration = configuration;
             _bCryptHelper = bCryptHelper;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public string CreatePassword(int length)
@@ -44,10 +47,10 @@ namespace Intelly_Api.Implementations
                 message.To.Add(new MailboxAddress("Recipient", recipient));
                 message.Subject = subject;
 
-                message.Body = new TextPart("plain")
-                {
-                    Text = body
-                };
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = body;
+
+                message.Body = bodyBuilder.ToMessageBody();
 
                 using (var client = new SmtpClient())
                 {
@@ -63,6 +66,24 @@ namespace Intelly_Api.Implementations
             {
                 
                 return false;
+            }
+        }
+
+        public string MakeHtmlNewUser(UserEnt userData, string temporalPassword)
+        {
+            try
+            {
+                string fileRoute = Path.Combine(_hostingEnvironment.ContentRootPath, "HtmlTemplates\\TemporalPassword.html");
+                string htmlFile = System.IO.File.ReadAllText(fileRoute);
+                htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
+                htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
+                htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
+
+                return htmlFile;
+            }
+            catch (Exception ex)
+            {
+                return "Error";
             }
         }
         public string GenerateToken(string userId)
