@@ -15,10 +15,12 @@ namespace Intelly_Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IDbConnectionProvider _connectionProvider;
+        private readonly ITools _tools;
 
-        public UsersController(IDbConnectionProvider connectionProvider)
+        public UsersController(IDbConnectionProvider connectionProvider, ITools tools)
         {
-            _connectionProvider = connectionProvider;  
+            _connectionProvider = connectionProvider;
+            _tools = tools;  
         }
 
         [HttpGet]
@@ -50,12 +52,13 @@ namespace Intelly_Api.Controllers
         [HttpGet]
         [Authorize]
         [Route("GetSpecificUser/{UserId}")]
-        public async Task<IActionResult> GetSpecificUser(int UserId)
+        public async Task<IActionResult> GetSpecificUser(string userToken)
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
+                long UserId = long.Parse(_tools.Decrypt(userToken));
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser",

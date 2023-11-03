@@ -10,5 +10,7 @@ namespace Intelly_Api.Interfaces
         public string GenerateToken(string userId);
 
         string MakeHtmlNewUser(UserEnt userData, string temporalPassword);
+        string Encrypt(string texto);
+        string Decrypt(string texto);
     }
 }
