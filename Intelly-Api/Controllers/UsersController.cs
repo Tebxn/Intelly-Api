@@ -50,7 +50,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         [Route("GetSpecificUser/{UserId}")]
         public async Task<IActionResult> GetSpecificUser(string userToken)
         {
@@ -144,6 +144,41 @@ namespace Intelly_Api.Controllers
                     var data = await context.QueryAsync<UserRoleEnt>("GetAllUsersRoles", commandType: CommandType.StoredProcedure);
                     response.Success = true;
                     response.Data = data.ToList();
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        [AllowAnonymous]
+        [Route("DisableSpecificUser")] 
+        public async Task<IActionResult> DisableSpecificUser(UserEnt entity)
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+
+            try
+            {
+                if (entity.User_Id == 0)
+                {
+                    response.ErrorMessage = "Company Id can't be empty.";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("DisableSpecificUser",
+                        new { entity.User_Id },
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Code = 200;
                     return Ok(response);
                 }
             }

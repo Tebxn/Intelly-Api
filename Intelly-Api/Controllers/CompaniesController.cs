@@ -129,6 +129,49 @@ namespace Intelly_Api.Controllers
 
         [HttpPut]
         [Authorize]
+        [Route("EditSpecificCompany")]
+        public async Task<IActionResult> EditSpecificCompany(CompanyEnt entity)
+        {
+            ApiResponse<CompanyEnt> response = new ApiResponse<CompanyEnt>();
+
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("EditSpecificCompany",
+                        new
+                        {
+                            entity.Company_Id,
+                            entity.Company_Name,
+                            entity.Company_Email,
+                            entity.Company_Phone
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (data > 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "User not found";
+                        response.Code = 404;
+                        return NotFound(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        [Authorize]
         [Route("DisableCompany")] //Need SP
         public async Task<IActionResult> DisableCompany(CompanyEnt entity)
         {
