@@ -51,31 +51,41 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("GetSpecificUser/{UserId}")]
+        [Route("GetSpecificUser/{userToken}")]
         public async Task<IActionResult> GetSpecificUser(string userToken)
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
-                long UserId = long.Parse(_tools.Decrypt(userToken));
-                using (var context = _connectionProvider.GetConnection())
-                {
-                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser",
-                        new { UserId }, commandType: CommandType.StoredProcedure);
+                // Desencripta el valor de userToken para obtener UserId
+                string decryptedUserToken = _tools.Decrypt(userToken);
 
-                    if (user != null)
+                if (long.TryParse(decryptedUserToken, out long UserId))
+                {
+                    using (var context = _connectionProvider.GetConnection())
                     {
-                        response.Success = true;
-                        response.Data = user;
-                        return Ok(response);
+                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { UserId }, commandType: CommandType.StoredProcedure);
+
+                        if (user != null)
+                        {
+                            response.Success = true;
+                            response.Data = user;
+                            return Ok(response);
+                        }
+                        else
+                        {
+                            response.ErrorMessage = "User not found";
+                            response.Code = 404;
+                            return NotFound(response);
+                        }
                     }
-                    else
-                    {
-                        response.ErrorMessage = "User not found";
-                        response.Code = 404;
-                        return NotFound(response);
-                    }
+                }
+                else
+                {
+                    response.ErrorMessage = "Invalid UserId";
+                    response.Code = 400;
+                    return BadRequest(response);
                 }
             }
             catch (SqlException ex)
@@ -85,6 +95,7 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
 
         [HttpPut]
         [Authorize]
