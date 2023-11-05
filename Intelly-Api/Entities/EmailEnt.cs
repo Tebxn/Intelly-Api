@@ -8,6 +8,8 @@
         public string? ImageUrl { get; set; }
         public string? CompanyName { get; set; }
         public long CompanySenderId { get; set; }
+        public long MarketingCampaignId { get; set; }
+        public DateTime? CreationDate { get; set; }
         
         
     }

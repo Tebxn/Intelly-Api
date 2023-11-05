@@ -24,6 +24,34 @@ namespace Intelly_Api.Controllers
             _tools = tools;
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GetAllMarketingCampaigns/{MarketingCampaign_CompanyId}")]
+        public async Task<IActionResult> GetAllUsers(string MarketingCampaign_CompanyId)
+        {
+            ApiResponse<List<MarketingCampaignEnt>> response = new ApiResponse<List<MarketingCampaignEnt>>();
+
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+
+                    var data = await context.QueryAsync<MarketingCampaignEnt>("GetAllMarketingCampaigns",new { MarketingCampaign_CompanyId },
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Data = data.ToList();
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
         [HttpPost]
         [Authorize]
         [Route("EmailMarketingManual")]

@@ -22,8 +22,8 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("GetAllProducts")]
-        public async Task<IActionResult> GetAllProducts()
+        [Route("GetAllProducts/{Product_CompanyId}")]
+        public async Task<IActionResult> GetAllProducts(long product_CompanyId)
         {
             ApiResponse<List<ProductEnt>> response = new ApiResponse<List<ProductEnt>>();
 
@@ -31,7 +31,8 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var users = await context.QueryAsync<ProductEnt>("GetAllProducts", commandType: CommandType.StoredProcedure);
+                    var users = await context.QueryAsync<ProductEnt>("GetAllProducts",
+                        new { product_CompanyId },commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
                     response.Data = users.ToList();

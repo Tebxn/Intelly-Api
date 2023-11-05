@@ -6,6 +6,7 @@
         public long Product_CompanyId { get; set; }
         public string? Product_Internal_Code { get; set; } = string.Empty;
         public string? Product_Name { get; set; } = string.Empty;
-        public float ? Product_Price { get; set; }
+        public float Product_Price { get; set; }
+        public string? Product_ImageUrl { get; set; } = string.Empty;
     }
 }
