@@ -99,20 +99,20 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("GetSpecificUserFromToken")]
-        public async Task<IActionResult> GetSpecificUserFromToken()
+        [Route("GetSpecificUserFromToken/{userToken}")]
+        public async Task<IActionResult> GetSpecificUserFromToken(string userToken)
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {   // Obtiene el User_Id desencriptando User.Identity.Name desde el token JWT
-                long User_Id = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
+                long UserId = long.Parse(_tools.Decrypt(userToken));
 
                 using (var context = _connectionProvider.GetConnection())
                 {
                     // Realiza la búsqueda del usuario en función del UserId obtenido.
-                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id }, commandType: CommandType.StoredProcedure);
-               
+                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser",new { UserId }, commandType: CommandType.StoredProcedure);
+
                     if (user != null)
                     {
                         response.Success = true;
