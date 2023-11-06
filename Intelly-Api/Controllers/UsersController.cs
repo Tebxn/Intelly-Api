@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
+using static Dapper.SqlMapper;
 
 namespace Intelly_Api.Controllers
 {
@@ -51,21 +52,21 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("GetSpecificUser/{userToken}")]
-        public async Task<IActionResult> GetSpecificUser(string userToken)
+        [Route("GetSpecificUser/{userId}")]
+        public async Task<IActionResult> GetSpecificUser(string userId)
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
-                // Desencripta el valor de userToken para obtener UserId
-                string decryptedUserToken = _tools.Decrypt(userToken);
+                // Desencripta el valor de userId para obtener UserId
+                string decryptedUserId = _tools.Decrypt(userId);
 
-                if (long.TryParse(decryptedUserToken, out long UserId))
+                if (long.TryParse(decryptedUserId, out long parsedUserId))
                 {
                     using (var context = _connectionProvider.GetConnection())
                     {
-                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { UserId }, commandType: CommandType.StoredProcedure);
+                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { UserId = parsedUserId }, commandType: CommandType.StoredProcedure);
 
                         if (user != null)
                         {
@@ -95,6 +96,45 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("GetSpecificUserFromToken")]
+        public async Task<IActionResult> GetSpecificUserFromToken()
+        {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
+            try
+            {   // Obtiene el User_Id desencriptando User.Identity.Name desde el token JWT
+                long User_Id = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    // Realiza la búsqueda del usuario en función del UserId obtenido.
+                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id }, commandType: CommandType.StoredProcedure);
+               
+                    if (user != null)
+                    {
+                        response.Success = true;
+                        response.Data = user;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "User not found";
+                        response.Code = 404;
+                        return NotFound(response);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
 
 
         [HttpPut]
