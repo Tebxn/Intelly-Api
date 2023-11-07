@@ -46,6 +46,7 @@ namespace Intelly_Api.Implementations
                 message.From.Add(new MailboxAddress("Intelly TI Support", emailSender));
                 message.To.Add(new MailboxAddress("Recipient", recipient));
                 message.Subject = subject;
+                
 
                 var bodyBuilder = new BodyBuilder();
                 bodyBuilder.HtmlBody = body;
@@ -78,6 +79,7 @@ namespace Intelly_Api.Implementations
                 htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
                 htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
                 htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
+                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/ChangePassword" + Encrypt(userData.User_Id.ToString()));
 
                 return htmlFile;
             }

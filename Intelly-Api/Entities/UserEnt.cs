@@ -12,6 +12,11 @@
         public bool? User_State { get; set; }
         public bool? User_Password_IsTemp { get; set; }
         public string? UserToken { get; set; } = string.Empty;
-  
+
+        public string User_Secure_Id { get; set; } = string.Empty;
+
+        public string User_Password_Temp { get; set; } = string.Empty;
+
+
     }
 }

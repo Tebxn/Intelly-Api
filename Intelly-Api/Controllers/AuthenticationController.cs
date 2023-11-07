@@ -334,19 +334,13 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                if (entity.User_Id == 0 || string.IsNullOrEmpty(entity.User_Password))
-                {
-                    response.ErrorMessage = "User_Id and new password can't be empty.";
-                    response.Code = 400;
-                    return BadRequest(response);
-                }
-
                 using (var context = _connectionProvider.GetConnection())
                 {
+                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
                     var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
                     var data = await context.ExecuteAsync("ChangePassword", //me devuelve -1
-                        new { entity.User_Id, newPassword },
+                        new { entity.User_Id, entity.User_Password_Temp, newPassword },
                         commandType: CommandType.StoredProcedure);
 
                     if (data != 0)
