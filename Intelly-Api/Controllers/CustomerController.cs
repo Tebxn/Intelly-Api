@@ -23,8 +23,8 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("GetAllCustomers/{CompanyId}")] //Get all cutomers from x company, please provide company id
-        public async Task<IActionResult> GetAllCustomers(long companyId)
+        [Route("GetAllCustomers/{Customer_Company_Id}")] //Get all cutomers from x company, please provide company id
+        public async Task<IActionResult> GetAllCustomers(string Customer_Company_Id)
         {
             ApiResponse<List<CustomerEnt>> response = new ApiResponse<List<CustomerEnt>>();
 
@@ -33,7 +33,7 @@ namespace Intelly_Api.Controllers
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.QueryAsync<CustomerEnt>("GetAllCustomers", //Need SP
-                        new {companyId}, commandType: CommandType.StoredProcedure);
+                        new { Customer_Company_Id }, commandType: CommandType.StoredProcedure);
 
                     if (data != null)
                     {
@@ -69,8 +69,7 @@ namespace Intelly_Api.Controllers
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.ExecuteAsync("NewCustomer",
-                        new {entity.Customer_Company_Id, entity.Customer_Name, entity.Customer_FirstLastname, 
-                            entity.Customer_SecondLastname, entity.Customer_Email, entity.Customer_Membership_Level},
+                        new {entity.Customer_Company_Id, entity.Customer_Name, entity.Customer_Email, entity.Customer_Membership_Level},
                         commandType: CommandType.StoredProcedure);
 
                     if (data > 0)

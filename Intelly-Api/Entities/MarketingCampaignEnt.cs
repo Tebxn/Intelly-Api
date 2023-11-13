@@ -10,5 +10,6 @@
         public DateTime? MarketingCampaign_End_Date { get; set; }
         public int? MarketingCampaign_MembershipLevel { get; set; }
         public string? Membership_Name { get; set; } = string.Empty;
+        public EmailEnt? Email { get; set; }
     }
 }
