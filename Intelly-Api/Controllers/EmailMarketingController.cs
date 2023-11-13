@@ -90,5 +90,68 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("CreateCampaign")]
+        public async Task<IActionResult> CreateCampaign(MarketingCampaignEnt entity) 
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+
+                    var data = await context.ExecuteAsync("CreateCampaign",
+                        new
+                        {
+                            entity.MarketingCampaign_CompanyId,
+                            entity.MarketingCampaign_Internal_Code,
+                            entity.MarketingCampaign_Name,
+                            entity.MarketingCampaign_Start_Date,
+                            entity.MarketingCampaign_End_Date,
+                            entity.MarketingCampaign_MembershipLevel
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Data = "Success";
+
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("GetAllMembershipLevels")]
+        public async Task<IActionResult> GetAllMembershipLevels()
+        {
+            ApiResponse<List<MembershipEnt>> response = new ApiResponse<List<MembershipEnt>>();
+
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+
+                    var data = await context.QueryAsync<MembershipEnt>("GetAllMembershipLevels",
+                        commandType: CommandType.StoredProcedure);
+
+                    response.Success = true;
+                    response.Data = data.ToList();
+                    return Ok(response);
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
     }
 }
