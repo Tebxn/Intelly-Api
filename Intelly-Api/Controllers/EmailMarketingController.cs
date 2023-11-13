@@ -7,6 +7,8 @@ using System.Data;
 using Intelly_Api.Interfaces;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
+using Org.BouncyCastle.Cms;
+using System.ComponentModel.Design;
 
 namespace Intelly_Api.Controllers
 {
@@ -153,5 +155,55 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("CreateCampaignEmail")]
+        public async Task<IActionResult> CreateCampaignEmail(MarketingCampaignEnt entity)
+        {
+            ApiResponse<string> response = new ApiResponse<string>();
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var marketingCampaign = await context.QueryFirstOrDefaultAsync<MarketingCampaignEnt>("GetSpecificMarketingCampaign",
+                        new { entity.MarketingCampaign_Name }, commandType: CommandType.StoredProcedure);
+
+                    var customers = await context.QueryAsync<CustomerEnt>("GetCustomersForMarketingCampaign",
+                        new { entity.MarketingCampaign_CompanyId, marketingCampaign.MarketingCampaign_MembershipLevel},
+                        commandType: CommandType.StoredProcedure);
+
+                    if (customers.Any())
+                    {
+                        string emailBodyTemplate = _tools.MakeHtmlEmailAdvertisement(entity.Email.Body, entity.Email.ImageUrl);
+                        foreach (var customer in customers)
+                        {
+                            bool emailIsSend = _tools.SendEmail(customer.Customer_Email, "NOMBRE EMPRESA", emailBodyTemplate);
+                            if (!emailIsSend)
+                            {
+                                response.Success = false;
+                                response.Data = "Cant send emails.";
+                                return BadRequest(response);
+                            }
+                        }
+
+                        response.Success = true;
+                        response.Data = "Success";
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Success = false;
+                        response.Data = "No customers found for the marketing campaign.";
+                        return BadRequest(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
     }
 }

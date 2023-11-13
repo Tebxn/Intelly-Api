@@ -2,6 +2,7 @@
 {
     public class EmailEnt
     {
+        public long Email_Id { get; set; }
         public string? EmailSender { get; set; }
         public string? Recipient { get; set; }
         public string? Body { get; set; }
