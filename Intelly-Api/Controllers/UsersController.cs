@@ -211,7 +211,7 @@ namespace Intelly_Api.Controllers
         [Route("UpdateUserState")] 
         public async Task<IActionResult> UpdateUserState(UserEnt entity)
         {
-            ApiResponse<string> response = new ApiResponse<string>();
+         
 
             try
             {
@@ -221,25 +221,13 @@ namespace Intelly_Api.Controllers
                        new { entity.User_Id},
                        commandType: CommandType.StoredProcedure);
 
-                    if (data != 0)
-                    {
-                        response.Success = true;
-                        response.Code = 200;
-                        return Ok(response);
-                    }
-                    else
-                    {
-                        response.Code = 500;
-                        response.ErrorMessage = "Error changing user state";
-                        return BadRequest(response);
-                    }
+                    return Ok(data);
+
                 }
             }
             catch (SqlException ex)
             {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                response.Code = 500;
-                return BadRequest(response);
+                return BadRequest(ex.Message);
             }
         }
 
