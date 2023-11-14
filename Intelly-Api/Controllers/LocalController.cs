@@ -52,7 +52,7 @@ namespace Intelly_Api.Controllers
         [HttpPost]
         [Authorize]
         [Route("CreateLocal")]
-        public async Task<IActionResult> CreateLocal(LocalEnt entity) 
+        public async Task<IActionResult> CreateLocal(LocalEnt entity)
         {
             ApiResponse<string> response = new ApiResponse<string>();
 
@@ -195,6 +195,13 @@ namespace Intelly_Api.Controllers
                     }
                 }
             }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
 
-    }
+        }
+    } 
 }
