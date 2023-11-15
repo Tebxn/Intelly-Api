@@ -34,7 +34,7 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var users = await context.QueryAsync<LocalEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
+                    var users = await context.QueryAsync<LocalEnt>("GetAllLocals", commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
                     response.Data = users.ToList();
