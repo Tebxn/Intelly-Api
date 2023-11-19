@@ -330,7 +330,7 @@ namespace Intelly_Api.Controllers
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword(UserEnt entity)
         {
-            ApiResponse<string> response = new ApiResponse<string>();
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
@@ -339,11 +339,18 @@ namespace Intelly_Api.Controllers
                     entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
                     var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
-                    var data = await context.ExecuteAsync("ChangePassword", //me devuelve -1
+                    var data = await context.ExecuteAsync("ChangePassword", 
                         new { entity.User_Id, entity.User_Password_Temp, newPassword },
                         commandType: CommandType.StoredProcedure);
 
-                    if (data != 0)
+					if (entity.User_Password != entity.User_Password)
+					{
+						response.ErrorMessage = "Esa no es la contraseña correcta";
+						response.Code = 400;
+						return BadRequest(response);
+					}
+
+					if (data != 0 )
                     {
                         response.Success = true;
                         response.Code = 200;
@@ -364,6 +371,8 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
+
     }
 }
 
