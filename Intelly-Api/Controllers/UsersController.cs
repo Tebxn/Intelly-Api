@@ -33,6 +33,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userId = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userId, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+                    return Unauthorized();
+
+                long IdUsuario = long.Parse(userType);
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
@@ -96,45 +105,51 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
-
         [HttpGet]
         [Authorize]
-        [Route("GetSpecificUserFromToken/{userToken}")]
-        public async Task<IActionResult> GetSpecificUserFromToken(string userToken)
+        [Route("GetSpecificUserFromToken")]
+        public async Task<IActionResult> GetSpecificUserFromToken()
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
-
             try
-            {   // Obtiene el User_Id desencriptando User.Identity.Name desde el token JWT
-                long UserId = long.Parse(_tools.Decrypt(userToken));
-
-                using (var context = _connectionProvider.GetConnection())
+            {
+                string userId = string.Empty;
+               
+                _tools.ObtainClaimsID(User.Claims, ref userId);
+                string decryptedUserId = userId;
+                if (long.TryParse(decryptedUserId, out long parsedUserId))
                 {
-                    // Realiza la búsqueda del usuario en función del UserId obtenido.
-                    var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser",new { UserId }, commandType: CommandType.StoredProcedure);
-
-                    if (user != null)
+                    using (var context = _connectionProvider.GetConnection())
                     {
-                        response.Success = true;
-                        response.Data = user;
-                        return Ok(response);
-                    }
-                    else
-                    {
-                        response.ErrorMessage = "User not found";
-                        response.Code = 404;
-                        return NotFound(response);
+                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id = parsedUserId }, commandType: CommandType.StoredProcedure);
+                        if (user != null)
+                        {
+                            response.Success = true;
+                            response.Data = user;
+                            return Ok(response);
+                        }
+                        else
+                        {
+                            response.ErrorMessage = "User not found";
+                            response.Code = 404;
+                            return NotFound(response);
+                        }
                     }
                 }
+                else
+                {
+                    response.ErrorMessage = "Invalid UserId";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 response.ErrorMessage = "Unexpected Error: " + ex.Message;
                 response.Code = 500;
                 return BadRequest(response);
             }
         }
-
 
 
         [HttpPut]

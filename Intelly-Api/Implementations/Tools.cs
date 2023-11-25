@@ -101,12 +101,12 @@ namespace Intelly_Api.Implementations
                 return "Error";
             }
         }
-        public string GenerateToken(string userId)
+        public string GenerateToken(string userId, string userType)
         {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, Encrypt(userId))
-            };
+            List<Claim> claims = new List<Claim>();
+            claims.Add(new Claim("userid", Encrypt(userId)));
+            claims.Add(new Claim("userType", Encrypt(userType)));
+
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("8Tc2nR3QBamz1ipE3b9aYSiTPYoGXQsy"));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -119,6 +119,20 @@ namespace Intelly_Api.Implementations
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string userType, ref bool isAdmin)
+        {
+            var claims = values.Select(Claim => new { Claim.Type, Claim.Value }).ToArray();
+            userId = Decrypt(claims.Where(x => x.Type == "userId").ToList().FirstOrDefault().Value);
+            userType = Decrypt(claims.Where(x => x.Type == "userType").ToList().FirstOrDefault().Value);
+
+            if (userType == "1")
+                isAdmin = true;
+        }
+        public void ObtainClaimsID(IEnumerable<Claim> values, ref string userId)
+        {
+            var claims = values.Select(Claim => new { Claim.Type, Claim.Value }).ToArray();
+            userId = Decrypt(claims.Where(x => x.Type == "userId").ToList().FirstOrDefault().Value);
+        }
         public string Encrypt(string texto)
         {
             byte[] iv = new byte[16];
@@ -171,6 +185,10 @@ namespace Intelly_Api.Implementations
                 }
             }
         }
+
+
+
+
 
     }
 

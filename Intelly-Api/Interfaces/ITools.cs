@@ -1,5 +1,6 @@
 ﻿using Intelly_Api.Entities;
 using System.Data;
+using System.Security.Claims;
 
 namespace Intelly_Api.Interfaces
 {
@@ -12,5 +13,7 @@ namespace Intelly_Api.Interfaces
         string MakeHtmlEmailAdvertisement(string body, string imageUrl);
         string Encrypt(string texto);
         string Decrypt(string texto);
+        public void ObtainClaims(IEnumerable<Claim> valores, ref string username, ref string userrol, ref bool isAdmin);
+        public void ObtainClaimsID(IEnumerable<Claim> values, ref string userId);
     }
 }

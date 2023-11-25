@@ -343,13 +343,6 @@ namespace Intelly_Api.Controllers
                         new { entity.User_Id, entity.User_Password_Temp, newPassword },
                         commandType: CommandType.StoredProcedure);
 
-					if (entity.User_Password != entity.User_Password)
-					{
-						response.ErrorMessage = "Esa no es la contraseña correcta";
-						response.Code = 400;
-						return BadRequest(response);
-					}
-
 					if (data != 0 )
                     {
                         response.Success = true;
