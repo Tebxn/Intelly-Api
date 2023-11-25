@@ -66,7 +66,7 @@ namespace Intelly_Api.Controllers
                     response.Success = true;
                     response.Code = 200;
                     response.Data = data;
-                    response.Data.UserToken = _tools.GenerateToken(data.User_Id.ToString());
+                    response.Data.UserToken = _tools.GenerateToken(data.User_Id.ToString(), data.User_Type.ToString());
                     return Ok(response);
                 }
             }

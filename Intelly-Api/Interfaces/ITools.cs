@@ -8,7 +8,7 @@ namespace Intelly_Api.Interfaces
     {
         String CreatePassword(int length);
         bool SendEmail(string recipient, string subject, string body);
-        public string GenerateToken(string userId);
+        public string GenerateToken(string userId, string userType);
         string MakeHtmlNewUser(UserEnt userData, string temporalPassword);
         string MakeHtmlEmailAdvertisement(string body, string imageUrl);
         string Encrypt(string texto);
