@@ -7,7 +7,7 @@
   "parameters": {
     "resourceGroupName": {
       "type": "string",
-      "defaultValue": "intelly-app-rg",
+      "defaultValue": "Intelly-Api20231127192017ResourceGroup",
       "metadata": {
         "description": "Name of the resource group for the resource. It is recommended to put resources under same resource group for better tracking."
       }
@@ -21,7 +21,7 @@
     },
     "resourceName": {
       "type": "string",
-      "defaultValue": "demoIntellyApi",
+      "defaultValue": "Intelly-Api",
       "metadata": {
         "description": "Name of the main resource to be created by this template."
       }
