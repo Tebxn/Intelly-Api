@@ -33,15 +33,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                string userId = string.Empty;
-                string userType = string.Empty;
-                bool isAdmin = false;
-                _tools.ObtainClaims(User.Claims, ref userId, ref userType, ref isAdmin);
+                //string userId = string.Empty;
+                //string isuserType = string.Empty;
+                //bool isAdmin = false;
+                //_tools.ObtainClaims(User.Claims, ref userId, ref isuserType, ref userType);
 
-                if (!isAdmin)
-                    return Unauthorized();
+                //if (!isAdmin)
+                //    return Unauthorized();
 
-                long IdUsuario = long.Parse(userType);
+                //long IdUsuario = long.Parse(isuserType);
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
@@ -109,6 +109,7 @@ namespace Intelly_Api.Controllers
         [Authorize]
         [Route("GetSpecificUserFromToken")]
         public async Task<IActionResult> GetSpecificUserFromToken()
+
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
             try

@@ -66,7 +66,7 @@ namespace Intelly_Api.Controllers
                     response.Success = true;
                     response.Code = 200;
                     response.Data = data;
-                    response.Data.UserToken = _tools.GenerateToken(data.User_Id.ToString(), data.User_Type.ToString());
+                    response.Data.UserToken = _tools.GenerateToken(data.User_Id.ToString());
                     return Ok(response);
                 }
             }
@@ -294,6 +294,7 @@ namespace Intelly_Api.Controllers
                     response.Code = 400;
                     return BadRequest(response);
                 }
+                long UserId = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
 
                 using (var context = _connectionProvider.GetConnection())
                 {
@@ -326,7 +327,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpPut]
-        [Authorize]
+        [AllowAnonymous]
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword(UserEnt entity)
         {
