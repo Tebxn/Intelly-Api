@@ -101,11 +101,12 @@ namespace Intelly_Api.Implementations
                 return "Error";
             }
         }
-        public string GenerateToken(string userId)
+        public string GenerateToken(string userId, string user_Type)
         {
             List<Claim> claims = new List<Claim>();
-            claims.Add(new Claim("userid", Encrypt(userId)));
-          
+            claims.Add(new Claim("userId", Encrypt(userId)));
+            claims.Add(new Claim("userType", Encrypt(user_Type)));
+
 
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("8Tc2nR3QBamz1ipE3b9aYSiTPYoGXQsy"));
@@ -119,14 +120,15 @@ namespace Intelly_Api.Implementations
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string isuserType, ref int userType)
+        public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string userType, ref bool isAdmin)
         {
             var claims = values.Select(Claim => new { Claim.Type, Claim.Value }).ToArray();
             userId = Decrypt(claims.Where(x => x.Type == "userId").ToList().FirstOrDefault().Value);
-            isuserType = Decrypt(claims.Where(x => x.Type == "userType").ToList().FirstOrDefault().Value);
+            userType = Decrypt(claims.Where(x => x.Type == "userType").ToList().FirstOrDefault().Value);
 
-            if (isuserType == "1")
-                userType = 1;
+            if (userType == "1" || userType == "2")
+                isAdmin = true;
+                
         }
         public void ObtainClaimsID(IEnumerable<Claim> values, ref string userId)
         {

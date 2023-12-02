@@ -33,15 +33,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                //string userId = string.Empty;
-                //string isuserType = string.Empty;
-                //bool isAdmin = false;
-                //_tools.ObtainClaims(User.Claims, ref userId, ref isuserType, ref userType);
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
 
-                //if (!isAdmin)
-                //    return Unauthorized();
+                if (!isAdmin)
+                   return Unauthorized();
 
-                //long IdUsuario = long.Parse(isuserType);
+       
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
@@ -114,15 +114,14 @@ namespace Intelly_Api.Controllers
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
             try
             {
-                string userId = string.Empty;
-               
-                _tools.ObtainClaimsID(User.Claims, ref userId);
-                string decryptedUserId = userId;
-                if (long.TryParse(decryptedUserId, out long parsedUserId))
+                string userToken = string.Empty;
+                _tools.ObtainClaimsID(User.Claims, ref userToken);
+                string decryptedUserToken = userToken;
+                if (long.TryParse(decryptedUserToken, out long parsedUserToken))
                 {
                     using (var context = _connectionProvider.GetConnection())
                     {
-                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id = parsedUserId }, commandType: CommandType.StoredProcedure);
+                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id = parsedUserToken }, commandType: CommandType.StoredProcedure);
                         if (user != null)
                         {
                             response.Success = true;
