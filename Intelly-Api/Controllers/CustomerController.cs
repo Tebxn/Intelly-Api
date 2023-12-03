@@ -68,8 +68,11 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
+                    var today = DateTime.Now;
+
                     var data = await context.ExecuteAsync("NewCustomer",
-                        new {entity.Customer_Company_Id, entity.Customer_Name, entity.Customer_Email, entity.Customer_Membership_Level},
+                        new {entity.Customer_Company_Id, entity.Customer_Name, entity.Customer_Email, 
+                            Customer_Registration_Date = today},
                         commandType: CommandType.StoredProcedure);
 
                     if (data > 0)
