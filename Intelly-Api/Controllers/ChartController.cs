@@ -202,5 +202,41 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("ChartTopCampaignsByTotal{companyId}")]
+        public async Task<IActionResult> ChartTopCampaignsByTotal(long companyId)
+        {
+            ApiResponse<List<ChartEnt>> response = new ApiResponse<List<ChartEnt>>();
+
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.QueryAsync<ChartEnt>("ChartTopCampaignsByTotal",
+                        new { CompanyId = companyId }, commandType: CommandType.StoredProcedure);
+
+                    if (data != null)
+                    {
+                        response.Success = true;
+                        response.Data = data.ToList();
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "Error consulting chart";
+                        response.Code = 404;
+                        return NotFound(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
     }
 }
