@@ -29,7 +29,7 @@ namespace Intelly_Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("GetAllMarketingCampaigns/{MarketingCampaign_CompanyId}")]
-        public async Task<IActionResult> GetAllUsers(string MarketingCampaign_CompanyId)
+        public async Task<IActionResult> GetAllMarketingCampaigns(string MarketingCampaign_CompanyId)
         {
             ApiResponse<List<MarketingCampaignEnt>> response = new ApiResponse<List<MarketingCampaignEnt>>();
 
@@ -72,14 +72,20 @@ namespace Intelly_Api.Controllers
 
                     string companyName = entity.CompanyName;
                     string body = entity.Body;
-                    
+
+                    long totalEmailsSended = 0;
 
                     foreach (var item in data) 
                     {
                         string recipient = item.Customer_Email;
                         _tools.SendEmail(recipient, companyName, body);
-   
+                        totalEmailsSended++;
                     }
+
+                    var data2 = await context.QueryAsync("UpdateEmailsSended", //PROBAR
+                       new {CompanyId = entity.CompanySenderId, CampaignId = entity.MarketingCampaignId, 
+                       TotalEmailsSended = totalEmailsSended},commandType: CommandType.StoredProcedure);
+
                     response.Success = true;
                     response.Code = 200;
                     return Ok(response);
