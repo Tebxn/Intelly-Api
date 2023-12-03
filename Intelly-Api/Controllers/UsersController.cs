@@ -116,53 +116,6 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
-        [HttpGet]
-        [Authorize]
-        [Route("GetSpecificUserFromToken")]
-        public async Task<IActionResult> GetSpecificUserFromToken()
-
-        {
-            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
-            try
-            {
-
-                string userToken = string.Empty;
-                _tools.ObtainClaimsID(User.Claims, ref userToken);
-                string decryptedUserToken = userToken;
-                if (long.TryParse(decryptedUserToken, out long parsedUserToken))
-                {
-                    using (var context = _connectionProvider.GetConnection())
-                    {
-                        var user = await context.QueryFirstOrDefaultAsync<UserEnt>("GetSpecificUser", new { User_Id = parsedUserToken }, commandType: CommandType.StoredProcedure);
-                        if (user != null)
-                        {
-                            response.Success = true;
-                            response.Data = user;
-                            return Ok(response);
-                        }
-                        else
-                        {
-                            response.ErrorMessage = "User not found";
-                            response.Code = 404;
-                            return NotFound(response);
-                        }
-                    }
-                }
-                else
-                {
-                    response.ErrorMessage = "Invalid UserId";
-                    response.Code = 400;
-                    return BadRequest(response);
-                }
-            }
-            catch (SqlException ex)
-            {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                response.Code = 500;
-                return BadRequest(response);
-            }
-        }
-
 
         [HttpPut]
         [Authorize]

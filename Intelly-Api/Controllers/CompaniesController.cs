@@ -33,14 +33,6 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                string userToken = string.Empty;
-                string userType = string.Empty;
-                bool isAdmin = false;
-                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
-
-                if (!isAdmin)
-
-                    return Unauthorized();
 
                 using (var context = _connectionProvider.GetConnection())
                 {

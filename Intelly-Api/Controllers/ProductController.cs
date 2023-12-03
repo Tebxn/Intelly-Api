@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using Intelly_Api.Implementations;
+using Intelly_Web.Entities;
 
 namespace Intelly_Api.Controllers
 {
@@ -20,22 +22,61 @@ namespace Intelly_Api.Controllers
             _connectionProvider = connectionProvider;
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("GetAllProducts/{Product_CompanyId}")]
-        public async Task<IActionResult> GetAllProducts(long product_CompanyId)
+        [HttpPost]
+        [Authorize]
+        [Route("AddProduct")]
+        public async Task<IActionResult> AddProduct(ProductEnt entity)
         {
-            ApiResponse<List<ProductEnt>> response = new ApiResponse<List<ProductEnt>>();
+            ApiResponse<string> response = new ApiResponse<string>();
 
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var users = await context.QueryAsync<ProductEnt>("GetAllProducts",
-                        new { product_CompanyId },commandType: CommandType.StoredProcedure);
+                    var data = await context.ExecuteAsync("AddProduct",
+                        new { entity.Product_Name, entity.Product_CompanyId, entity.Product_Internal_Code, entity.Product_Price,entity.Product_ImageUrl },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (data > 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "Error with the input customer data";
+                        response.Code = 500;
+                        return BadRequest(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GetAllProducts")]
+        public async Task<IActionResult> GetAllProducts()
+        {
+            ApiResponse<List<ProductEnt>> response = new ApiResponse<List<ProductEnt>>();
+
+            try
+            {
+                
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var productsData = await context.QueryAsync<ProductEnt>("GetAllProducts", commandType: CommandType.StoredProcedure);
 
                     response.Success = true;
-                    response.Data = users.ToList();
+                    response.Data = productsData.ToList();
+
                     return Ok(response);
                 }
             }
@@ -48,23 +89,73 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         [Route("GetSpecificProduct/{ProductId}")]
-        public async Task<IActionResult> GetSpecificProduct(int UserId)
+        public async Task<IActionResult> GetSpecificProduct(long ProductId)
         {
             ApiResponse<ProductEnt> response = new ApiResponse<ProductEnt>();
 
             try
             {
+
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var user = await context.QueryFirstOrDefaultAsync<ProductEnt>("GetSpecificProduct",
-                        new { UserId }, commandType: CommandType.StoredProcedure);
+                    var companyData = await context.QueryFirstOrDefaultAsync<ProductEnt>("GetSpecificProduct",
+                        new { ProductId }, commandType: CommandType.StoredProcedure);
 
-                    if (user != null)
+                    if (companyData != null)
                     {
                         response.Success = true;
-                        response.Data = user;
+                        response.Data = companyData;
+
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "Company not found";
+                        response.Code = 404;
+
+                        return NotFound(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("EditSpecificProduct")]
+        public async Task<IActionResult> EditSpecificProduct(ProductEnt entity)
+        {
+            ApiResponse<ProductEnt> response = new ApiResponse<ProductEnt>();
+
+            try
+            {
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("EditSpecificProduct",
+                        new
+                        {
+                            entity.Product_Id,
+                            entity.Product_CompanyId,
+                            entity.Product_Internal_Code,
+                            entity.Product_Name,
+                            entity.Product_Price,
+                            entity.Product_ImageUrl
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (data > 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
                         return Ok(response);
                     }
                     else
