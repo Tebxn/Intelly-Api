@@ -8,27 +8,37 @@ using System.Data.SqlClient;
 
 namespace Intelly_Api.Controllers
 {
-    public class BuyController : Controller
+    public class SellController : Controller
     {
         private readonly IDbConnectionProvider _connectionProvider;
 
-        public BuyController(IDbConnectionProvider connectionProvider)
+        public SellController(IDbConnectionProvider connectionProvider)
         {
             _connectionProvider = connectionProvider;
         }
         [HttpPost]
-        [Authorize]
-        [Route("NewBuy")]
-        public async Task<IActionResult> NewBuy(CustomerEnt entity) //Need SP
+        [AllowAnonymous]
+        [Route("NewSell")]
+        public async Task<IActionResult> NewSell(SellEnt entity) //Need SP
         {
             ApiResponse<string> response = new ApiResponse<string>();
             try
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.ExecuteAsync("NewBuy",
-                        new { entity.Customer_Company_Id, entity.Customer_Name, entity.Customer_Email, entity.Customer_Membership_Level },
-                        commandType: CommandType.StoredProcedure);
+                    DateTime today = DateTime.Now;
+
+                    var data = await context.ExecuteAsync("NewSell",
+                        new
+                        {
+                            NumFactura = entity.NumFactura,
+                            CustomerId = entity.CustomerId,
+                            CompanyId = entity.CompanyId,
+                            LocalId = entity.LocalId,
+                            SellDate = today,
+                            MarketingCampaignId = entity.MarketingCampaignId,
+                            SellTotal = entity.Total
+                        }, commandType: CommandType.StoredProcedure);
 
                     if (data > 0)
                     {
@@ -38,7 +48,7 @@ namespace Intelly_Api.Controllers
                     }
                     else
                     {
-                        response.ErrorMessage = "Error with the input customer data";
+                        response.ErrorMessage = "Error with the input buy data";
                         response.Code = 500;
                         return BadRequest(response);
                     }
