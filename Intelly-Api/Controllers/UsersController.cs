@@ -39,7 +39,8 @@ namespace Intelly_Api.Controllers
                 _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
 
                 if (!isAdmin)
-                   return Unauthorized();
+
+                    return Unauthorized();
 
        
                 using (var context = _connectionProvider.GetConnection())
@@ -68,6 +69,16 @@ namespace Intelly_Api.Controllers
 
             try
             {
+
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 // Desencripta el valor de userId para obtener UserId
                 string decryptedUserId = _tools.Decrypt(userId);
 
@@ -114,6 +125,7 @@ namespace Intelly_Api.Controllers
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
             try
             {
+
                 string userToken = string.Empty;
                 _tools.ObtainClaimsID(User.Claims, ref userToken);
                 string decryptedUserToken = userToken;
@@ -161,6 +173,16 @@ namespace Intelly_Api.Controllers
 
             try
             {
+
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.ExecuteAsync("EditSpecificUser",
@@ -205,6 +227,16 @@ namespace Intelly_Api.Controllers
 
             try
             {
+
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.QueryAsync<UserRoleEnt>("GetAllUsersRoles", commandType: CommandType.StoredProcedure);

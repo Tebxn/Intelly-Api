@@ -16,10 +16,12 @@ namespace Intelly_Api.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly IDbConnectionProvider _connectionProvider;
+        private readonly ITools _tools;
 
-        public CompaniesController(IDbConnectionProvider connectionProvider)
+        public CompaniesController(IDbConnectionProvider connectionProvider, ITools tools)
         {
             _connectionProvider = connectionProvider;
+            _tools = tools;
         }
 
         [HttpGet]
@@ -31,6 +33,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var companiesData = await context.QueryAsync<CompanyEnt>("GetAllCompanies", commandType: CommandType.StoredProcedure);
@@ -58,6 +69,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var companyData = await context.QueryFirstOrDefaultAsync<CompanyEnt>("GetSpecificCompany",
@@ -97,6 +117,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 if (string.IsNullOrEmpty(entity.Company_Name) || string.IsNullOrEmpty(entity.Company_Email) || string.IsNullOrEmpty(entity.Company_Phone))
                 {
                     response.ErrorMessage = "Name, email and phone are required.";
@@ -136,6 +165,15 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.ExecuteAsync("EditSpecificCompany",
