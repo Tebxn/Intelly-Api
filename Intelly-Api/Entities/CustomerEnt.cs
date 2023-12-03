@@ -10,6 +10,7 @@
         public bool? Customer_Allow_Mails { get; set; }
         public bool? Customer_Status { get; set; }
         public string? Membership_Name { get; set; } = string.Empty; //join membership
+        public DateTime Customer_Registration_Date { get; set; }
 
     }
 }
