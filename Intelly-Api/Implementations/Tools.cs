@@ -120,22 +120,6 @@ namespace Intelly_Api.Implementations
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        //public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string userType, ref bool isAdmin)
-        //{
-        //    var claims = values.Select(Claim => new { Claim.Type, Claim.Value }).ToArray();
-        //    userId = Decrypt(claims.Where(x => x.Type == "userId").ToList().FirstOrDefault().Value);
-        //    userType = Decrypt(claims.Where(x => x.Type == "userType").ToList().FirstOrDefault().Value);
-
-        //    if (userType == "1" || userType == "2")
-        //        isAdmin = true;
-
-        //}
-        //public void ObtainClaimsID(IEnumerable<Claim> values, ref string userId)
-        //{
-        //    var claims = values.Select(Claim => new { Claim.Type, Claim.Value }).ToArray();
-        //    userId = Decrypt(claims.Where(x => x.Type == "userId").ToList().FirstOrDefault().Value);
-        //}
-
         public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string userType, ref bool isAdmin)
         {
             var claims = values.ToDictionary(c => c.Type, c => c.Value);
