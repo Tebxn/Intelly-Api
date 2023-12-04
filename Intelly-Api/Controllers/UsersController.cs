@@ -33,16 +33,6 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                string userToken = string.Empty;
-                string userType = string.Empty;
-                bool isAdmin = false;
-                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
-
-                if (!isAdmin)
-
-                    return Unauthorized();
-
-
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var users = await context.QueryAsync<UserEnt>("GetAllUsers", commandType: CommandType.StoredProcedure);
@@ -69,17 +59,6 @@ namespace Intelly_Api.Controllers
 
             try
             {
-
-                string userToken = string.Empty;
-                string userType = string.Empty;
-                bool isAdmin = false;
-                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
-
-                if (!isAdmin)
-
-                    return Unauthorized();
-
-                // Desencripta el valor de userId para obtener UserId
                 string decryptedUserId = _tools.Decrypt(userId);
 
                 if (long.TryParse(decryptedUserId, out long parsedUserId))
