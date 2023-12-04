@@ -10,6 +10,5 @@
         //For ChartTopCampaignsByTotal
         public string? Sell_MarketingCampaignId { get; set; } = String.Empty;
         public string? MarketingCampaign_Name { get; set; } = String.Empty;
-        public float? TotalSales { get; set; }
     }
 }

@@ -24,7 +24,7 @@ namespace Intelly_Api.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         [Route("ChartNewCustomersMonth{companyId}")]
         public async Task<IActionResult> ChartNewCustomersMonth(long companyId)
         {
