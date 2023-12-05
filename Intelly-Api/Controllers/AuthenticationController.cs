@@ -190,93 +190,93 @@ namespace Intelly_Api.Controllers
             }
         }
 
-        [HttpPut]
-        [Authorize]
-        [Route("DisableAccount")]
-        public async Task<IActionResult> DisableAccount(UserEnt entity)
-        {
-            ApiResponse<string> response = new ApiResponse<string>();
+        //[HttpPut]
+        //[Authorize]
+        //[Route("DisableAccount")]
+        //public async Task<IActionResult> DisableAccount(UserEnt entity)
+        //{
+        //    ApiResponse<string> response = new ApiResponse<string>();
 
-            try
-            {
-                if (entity.User_Id == 0)
-                {
-                    response.ErrorMessage = "User_Id can't be empty.";
-                    response.Code = 400;
-                    return BadRequest(response);
-                }
+        //    try
+        //    {
+        //        if (entity.User_Id == 0)
+        //        {
+        //            response.ErrorMessage = "User_Id can't be empty.";
+        //            response.Code = 400;
+        //            return BadRequest(response);
+        //        }
 
-                using (var context = _connectionProvider.GetConnection())
-                {
-                    var data = await context.ExecuteAsync("DisableAccount",
-                        new { entity.User_Id },
-                        commandType: CommandType.StoredProcedure);
+        //        using (var context = _connectionProvider.GetConnection())
+        //        {
+        //            var data = await context.ExecuteAsync("DisableAccount",
+        //                new { entity.User_Id },
+        //                commandType: CommandType.StoredProcedure);
 
-                    if (data > 0)
-                    {
-                        response.Success = true;
-                        response.Code = 200;
-                        return Ok(response);
-                    }
-                    else
-                    {
-                        response.Code = 500;
-                        response.ErrorMessage = "Error disabling account";
-                        return BadRequest(response);
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                response.Code = 500;
-                return BadRequest(response);
-            }
-        }
+        //            if (data > 0)
+        //            {
+        //                response.Success = true;
+        //                response.Code = 200;
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
+        //                response.Code = 500;
+        //                response.ErrorMessage = "Error disabling account";
+        //                return BadRequest(response);
+        //            }
+        //        }
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //        response.Code = 500;
+        //        return BadRequest(response);
+        //    }
+        //}
 
-        [HttpPut]
-        [Authorize]
-        [Route("ActivateAccount")]
-        public async Task<IActionResult> ActivateAccount(int User_Id)
-        {
-            ApiResponse<string> response = new ApiResponse<string>();
+        //[HttpPut]
+        //[Authorize]
+        //[Route("ActivateAccount")]
+        //public async Task<IActionResult> ActivateAccount(int User_Id)
+        //{
+        //    ApiResponse<string> response = new ApiResponse<string>();
 
-            try
-            {
-                if (User_Id == 0)
-                {
-                    response.ErrorMessage = "User_Id can't be empty.";
-                    response.Code = 400;
-                    return BadRequest(response);
-                }
+        //    try
+        //    {
+        //        if (User_Id == 0)
+        //        {
+        //            response.ErrorMessage = "User_Id can't be empty.";
+        //            response.Code = 400;
+        //            return BadRequest(response);
+        //        }
 
-                using (var context = _connectionProvider.GetConnection())
-                {
-                    var data = await context.ExecuteAsync("ActivateAccount",
-                        new { User_Id = User_Id },
-                        commandType: CommandType.StoredProcedure);
+        //        using (var context = _connectionProvider.GetConnection())
+        //        {
+        //            var data = await context.ExecuteAsync("ActivateAccount",
+        //                new { User_Id = User_Id },
+        //                commandType: CommandType.StoredProcedure);
 
-                    if (data > 0)
-                    {
-                        response.Success = true;
-                        response.Code = 200;
-                        return Ok(response);
-                    }
-                    else
-                    {
-                        response.Code = 500;
-                        response.ErrorMessage = "Error activating account";
-                        return BadRequest(response);
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                response.Code = 500;
-                return BadRequest(response);
-            }
-        }
+        //            if (data > 0)
+        //            {
+        //                response.Success = true;
+        //                response.Code = 200;
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
+        //                response.Code = 500;
+        //                response.ErrorMessage = "Error activating account";
+        //                return BadRequest(response);
+        //            }
+        //        }
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //        response.Code = 500;
+        //        return BadRequest(response);
+        //    }
+        //}
 
 
         [HttpPut]
@@ -326,46 +326,109 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        //   [HttpPut]
+        //   [AllowAnonymous]
+        //   [Route("ChangePassword")]
+        //   public async Task<IActionResult> ChangePassword(UserEnt entity)
+        //   {
+        //       ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
+        //       try
+        //       {
+        //           using (var context = _connectionProvider.GetConnection())
+        //           {
+        //               entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
+        //               var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
+
+        //               var data = await context.ExecuteAsync("ChangePassword", 
+        //                   new { entity.User_Id, entity.User_Password_Temp, newPassword },
+        //                   commandType: CommandType.StoredProcedure);
+
+        //if (data != 0 )
+        //               {
+        //                   response.Success = true;
+        //                   response.Code = 200;
+        //                   return Ok(response);
+        //               }
+        //               else
+        //               {
+        //                   response.Code = 500;
+        //                   response.ErrorMessage = "Error changing password";
+        //                   return BadRequest(response);
+        //               }
+        //           }
+        //       }
+        //       catch (SqlException ex)
+        //       {
+        //           response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //           response.Code = 500;
+        //           return BadRequest(response);
+        //       }
+        //   }
+
         [HttpPut]
         [AllowAnonymous]
-        [Route("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(UserEnt entity)
+        [Route("UpdateNewPassword")]
+        public async Task<IActionResult> UpdateNewPassword(UserEnt entity)
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
-                using (var context = _connectionProvider.GetConnection())
+                using (var connection = _connectionProvider.GetConnection())
                 {
                     entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
-                    var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
-                    var data = await context.ExecuteAsync("ChangePassword", 
-                        new { entity.User_Id, entity.User_Password_Temp, newPassword },
-                        commandType: CommandType.StoredProcedure);
+                    var getPass = await connection.QueryFirstOrDefaultAsync<UserEnt>("GetEncryptedPass",
+                         new { entity.User_Id },
+                         commandType: CommandType.StoredProcedure);
 
-					if (data != 0 )
+                    if (getPass != null)
                     {
-                        response.Success = true;
-                        response.Code = 200;
-                        return Ok(response);
+                        getPass.User_Password = _tools.Decrypt(getPass.User_Password);
+                        if (getPass.User_Password != entity.User_Password_Temp)
+                        {
+                            response.ErrorMessage = "La contraseña temporal proporcionada no es valida";
+                            response.Code = 500;
+                            return BadRequest(response);
+                        }
+                        else
+                        {
+                            entity.User_Password = _tools.Encrypt(entity.User_Password);
+
+                            var data = await connection.ExecuteAsync("ChangePassword",
+                                new { entity.User_Id, entity.User_Password },
+                                commandType: CommandType.StoredProcedure);
+
+                            if (data != 0)
+                            {
+                                response.Success = true;
+                                response.Code = 200;
+                                return Ok(response);
+                            }
+                            else
+                            {
+                                response.ErrorMessage = "Error al actualizar su contraseña nueva";
+                                response.Code = 500;
+                                return BadRequest(response);
+                            }
+                        }
                     }
                     else
                     {
+                        response.ErrorMessage = "Error al actualizar su contraseña nueva";
                         response.Code = 500;
-                        response.ErrorMessage = "Error changing password";
                         return BadRequest(response);
                     }
+
                 }
             }
             catch (SqlException ex)
             {
                 response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                response.Code = 500;
                 return BadRequest(response);
             }
         }
-
 
     }
 }
