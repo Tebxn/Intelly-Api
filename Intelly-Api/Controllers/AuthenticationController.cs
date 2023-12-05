@@ -279,32 +279,72 @@ namespace Intelly_Api.Controllers
         //}
 
 
+        //[HttpPut]
+        //[Authorize]
+        //[Route("UpdateUserPassword")]
+        //public async Task<IActionResult> UpdateUserPassword(UserEnt entity)
+        //{
+        //    ApiResponse<string> response = new ApiResponse<string>();
+
+        //    try
+        //    {
+        //        if (entity.User_Password == null)
+        //        {
+        //            response.ErrorMessage = "Email can't be empty.";
+        //            response.Code = 400;
+        //            return BadRequest(response);
+        //        }
+        //        long UserId = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
+
+        //        using (var context = _connectionProvider.GetConnection())
+        //        {
+        //            var hashedPassword = _bCryptHelper.HashPassword(entity.User_Password);
+
+        //            var data = await context.QueryFirstOrDefaultAsync<UserEnt>("UpdateUserPassword",
+        //                new { entity.User_Id, hashedPassword},
+        //                commandType: CommandType.StoredProcedure);
+
+        //            if (data != null)
+        //            {
+        //                response.Success = true;
+        //                response.Code = 200;
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
+        //                response.Code = 500;
+        //                response.ErrorMessage = "Error updating password";
+        //                return BadRequest(response);
+        //            }
+        //        }
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //        response.Code = 500;
+        //        return BadRequest(response);
+        //    }
+        //}
+
         [HttpPut]
-        [Authorize]
-        [Route("UpdateUserPassword")]
-        public async Task<IActionResult> UpdateUserPassword(UserEnt entity)
+        [AllowAnonymous]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(UserEnt entity)
         {
-            ApiResponse<string> response = new ApiResponse<string>();
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
             try
             {
-                if (entity.User_Password == null)
-                {
-                    response.ErrorMessage = "Email can't be empty.";
-                    response.Code = 400;
-                    return BadRequest(response);
-                }
-                long UserId = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
-
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var hashedPassword = _bCryptHelper.HashPassword(entity.User_Password);
+                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
+                    var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
-                    var data = await context.QueryFirstOrDefaultAsync<UserEnt>("UpdateUserPassword",
-                        new { entity.User_Id, hashedPassword},
+                    var data = await context.ExecuteAsync("ChangePassword",
+                        new { entity.User_Id, entity.User_Password_Temp, newPassword },
                         commandType: CommandType.StoredProcedure);
 
-                    if (data != null)
+                    if (data != 0)
                     {
                         response.Success = true;
                         response.Code = 200;
@@ -313,7 +353,7 @@ namespace Intelly_Api.Controllers
                     else
                     {
                         response.Code = 500;
-                        response.ErrorMessage = "Error updating password";
+                        response.ErrorMessage = "Error changing password";
                         return BadRequest(response);
                     }
                 }
@@ -326,109 +366,69 @@ namespace Intelly_Api.Controllers
             }
         }
 
-        //   [HttpPut]
-        //   [AllowAnonymous]
-        //   [Route("ChangePassword")]
-        //   public async Task<IActionResult> ChangePassword(UserEnt entity)
-        //   {
-        //       ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+        //[HttpPut]
+        //[AllowAnonymous]
+        //[Route("UpdateNewPassword")]
+        //public async Task<IActionResult> UpdateNewPassword(UserEnt entity)
+        //{
+        //    ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
-        //       try
-        //       {
-        //           using (var context = _connectionProvider.GetConnection())
-        //           {
-        //               entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
-        //               var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
+        //    try
+        //    {
+        //        using (var connection = _connectionProvider.GetConnection())
+        //        {
+        //            entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
 
-        //               var data = await context.ExecuteAsync("ChangePassword", 
-        //                   new { entity.User_Id, entity.User_Password_Temp, newPassword },
-        //                   commandType: CommandType.StoredProcedure);
+        //            var getPass = await connection.QueryFirstOrDefaultAsync<UserEnt>("GetEncryptedPass",
+        //                 new { entity.User_Id },
+        //                 commandType: CommandType.StoredProcedure);
 
-        //if (data != 0 )
-        //               {
-        //                   response.Success = true;
-        //                   response.Code = 200;
-        //                   return Ok(response);
-        //               }
-        //               else
-        //               {
-        //                   response.Code = 500;
-        //                   response.ErrorMessage = "Error changing password";
-        //                   return BadRequest(response);
-        //               }
-        //           }
-        //       }
-        //       catch (SqlException ex)
-        //       {
-        //           response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //           response.Code = 500;
-        //           return BadRequest(response);
-        //       }
-        //   }
+        //            if (getPass != null)
+        //            {
+        //                getPass.User_Password = _tools.Decrypt(getPass.User_Password);
+        //                if (getPass.User_Password != entity.User_Password_Temp)
+        //                {
+        //                    response.ErrorMessage = "La contraseña temporal proporcionada no es valida";
+        //                    response.Code = 500;
+        //                    return BadRequest(response);
+        //                }
+        //                else
+        //                {
+        //                    entity.User_Password = _tools.Encrypt(entity.User_Password);
 
-        [HttpPut]
-        [AllowAnonymous]
-        [Route("UpdateNewPassword")]
-        public async Task<IActionResult> UpdateNewPassword(UserEnt entity)
-        {
-            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+        //                    var data = await connection.ExecuteAsync("ChangePassword",
+        //                        new { entity.User_Id, entity.User_Password },
+        //                        commandType: CommandType.StoredProcedure);
 
-            try
-            {
-                using (var connection = _connectionProvider.GetConnection())
-                {
-                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
+        //                    if (data != 0)
+        //                    {
+        //                        response.Success = true;
+        //                        response.Code = 200;
+        //                        return Ok(response);
+        //                    }
+        //                    else
+        //                    {
+        //                        response.ErrorMessage = "Error al actualizar su contraseña nueva";
+        //                        response.Code = 500;
+        //                        return BadRequest(response);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                response.ErrorMessage = "Error al actualizar su contraseña nueva";
+        //                response.Code = 500;
+        //                return BadRequest(response);
+        //            }
 
-                    var getPass = await connection.QueryFirstOrDefaultAsync<UserEnt>("GetEncryptedPass",
-                         new { entity.User_Id },
-                         commandType: CommandType.StoredProcedure);
-
-                    if (getPass != null)
-                    {
-                        getPass.User_Password = _tools.Decrypt(getPass.User_Password);
-                        if (getPass.User_Password != entity.User_Password_Temp)
-                        {
-                            response.ErrorMessage = "La contraseña temporal proporcionada no es valida";
-                            response.Code = 500;
-                            return BadRequest(response);
-                        }
-                        else
-                        {
-                            entity.User_Password = _tools.Encrypt(entity.User_Password);
-
-                            var data = await connection.ExecuteAsync("ChangePassword",
-                                new { entity.User_Id, entity.User_Password },
-                                commandType: CommandType.StoredProcedure);
-
-                            if (data != 0)
-                            {
-                                response.Success = true;
-                                response.Code = 200;
-                                return Ok(response);
-                            }
-                            else
-                            {
-                                response.ErrorMessage = "Error al actualizar su contraseña nueva";
-                                response.Code = 500;
-                                return BadRequest(response);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        response.ErrorMessage = "Error al actualizar su contraseña nueva";
-                        response.Code = 500;
-                        return BadRequest(response);
-                    }
-
-                }
-            }
-            catch (SqlException ex)
-            {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                return BadRequest(response);
-            }
-        }
+        //        }
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //        return BadRequest(response);
+        //    }
+        //}
 
     }
 }
