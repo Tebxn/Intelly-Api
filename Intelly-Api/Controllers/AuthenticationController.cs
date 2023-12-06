@@ -337,7 +337,7 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
+                    entity.UserToken = _tools.Decrypt(entity.UserToken);
                     var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
                     var data = await context.ExecuteAsync("ChangePassword",

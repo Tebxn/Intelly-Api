@@ -76,7 +76,7 @@ namespace Intelly_Api.Implementations
                 htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
                 htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
                 htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
-                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/UpdateNewPassword?q=" + Encrypt(userData.User_Id.ToString()));
+                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/ChangePassword?q=" + Encrypt(userData.UserToken));
                 
                 return htmlFile;
             }
