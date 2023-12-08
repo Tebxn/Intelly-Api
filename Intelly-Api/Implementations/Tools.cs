@@ -76,7 +76,7 @@ namespace Intelly_Api.Implementations
                 htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
                 htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
                 htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
-                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/ChangePassword?q=" + Encrypt(userData.UserToken));
+                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/ChangePassword?q=" + Encrypt(userData.User_Id.ToString()));
                 
                 return htmlFile;
             }
@@ -199,6 +199,19 @@ namespace Intelly_Api.Implementations
                 }
             }
         }
+
+        public string GenerateRandomCode(int length)
+        {
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            while (0 < length--)
+            {
+                res.Append(valid[rnd.Next(valid.Length)]);
+            }
+            return res.ToString();
+        }
+
 
 
 

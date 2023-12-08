@@ -337,7 +337,7 @@ namespace Intelly_Api.Controllers
             {
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    entity.UserToken = _tools.Decrypt(entity.UserToken);
+                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
                     var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
                     var data = await context.ExecuteAsync("ChangePassword",
@@ -429,6 +429,84 @@ namespace Intelly_Api.Controllers
         //        return BadRequest(response);
         //    }
         //}
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("PwdRecovery")]
+        public async Task<IActionResult> PwdRecovery(UserEnt entity)
+        {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(entity.User_Email))
+                {
+                    response.ErrorMessage = "Email is required";
+                    response.Code = 400;
+                    return BadRequest(response);
+                }
+
+                using (var connection = _connectionProvider.GetConnection())
+                {
+                    var data = await connection.QueryFirstOrDefaultAsync<UserEnt>("PwdRecovery",
+                        new { entity.User_Email },
+                        commandType: CommandType.StoredProcedure);
+
+
+                    if (data != null)
+                    {
+                        var randomPassword = _tools.GenerateRandomCode(8);
+                        var hashedPassword = _tools.Encrypt(randomPassword);
+                        entity.User_Password = hashedPassword;
+
+                        string body = _tools.MakeHtmlNewUser(data, randomPassword);
+                        string recipient = entity.User_Email;
+
+                        var updatePass = await connection.ExecuteAsync("UpdateTempPassword",
+                        new { data.User_Id, hashedPassword },
+                        commandType: CommandType.StoredProcedure);
+
+
+                        if (updatePass != 0)
+                        {
+                            bool emailIsSend = _tools.SendEmail(recipient, "Intelly - Restaurar Contraseña", body);
+
+                            if (emailIsSend)
+                            {
+                                response.Success = true;
+                                response.Code = 200;
+                                return Ok(response);
+                            }
+                            else
+                            {
+                                response.ErrorMessage = "Error enviando el correo";
+                                response.Code = 500;
+                                return BadRequest(response);
+                            }
+
+                        }
+                        else
+                        {
+                            response.ErrorMessage = "Error actualizando contraseña";
+                            response.Code = 500;
+                            return BadRequest(response);
+                        }
+
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "Correo no valido o usuario inactivo";
+                        response.Code = 500;
+                        return BadRequest(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                return BadRequest(response);
+            }
+        }
 
     }
 }
