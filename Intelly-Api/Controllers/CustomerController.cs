@@ -15,10 +15,12 @@ namespace Intelly_Api.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly IDbConnectionProvider _connectionProvider;
+        private readonly ITools _tools;
 
-        public CustomerController(IDbConnectionProvider connectionProvider)
+        public CustomerController(IDbConnectionProvider connectionProvider, ITools tools)
         {
             _connectionProvider = connectionProvider;
+            _tools = tools;
         }
 
         [HttpGet]
@@ -30,6 +32,14 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var data = await context.QueryAsync<CustomerEnt>("GetAllCustomers", //Need SP
@@ -66,6 +76,14 @@ namespace Intelly_Api.Controllers
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
                 using (var context = _connectionProvider.GetConnection())
                 {
                     var today = DateTime.Now;
@@ -96,30 +114,40 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
+
         [HttpGet]
         [Authorize]
-        [Route("GetSpecificCustomer/{CompanyId}/{UserId}")]
-        public async Task<IActionResult> GetSpecificCustumer(long companyId, long userId)
+        [Route("GetSpecificCustomer/{CustomerId}")]
+        public async Task<IActionResult> GetSpecificCustomer(long CustomerId)
         {
             ApiResponse<CustomerEnt> response = new ApiResponse<CustomerEnt>();
 
             try
             {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.QueryFirstOrDefaultAsync<CustomerEnt>("GetSpecificCustumer", //Need SP
-                        new { companyId, userId }, commandType: CommandType.StoredProcedure);
+                    var companyData = await context.QueryFirstOrDefaultAsync<CustomerEnt>("GetSpecificCompany",
+                        new { CustomerId }, commandType: CommandType.StoredProcedure);
 
-                    if (data != null)
+                    if (companyData != null)
                     {
                         response.Success = true;
-                        response.Data = data;
+                        response.Data = companyData;
 
                         return Ok(response);
                     }
                     else
                     {
-                        response.ErrorMessage = "Customer not found";
+                        response.ErrorMessage = "Company not found";
                         response.Code = 404;
 
                         return NotFound(response);
@@ -132,6 +160,82 @@ namespace Intelly_Api.Controllers
                 response.Code = 500;
 
                 return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("EditSpecificCustomer")]
+        public async Task<IActionResult> EditSpecificCustomer(CustomerEnt entity)
+        {
+            ApiResponse<CustomerEnt> response = new ApiResponse<CustomerEnt>();
+
+            try
+            {
+                string userToken = string.Empty;
+                string userType = string.Empty;
+                bool isAdmin = false;
+                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
+
+                if (!isAdmin)
+
+                    return Unauthorized();
+
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("EditSpecificCompany",
+                        new
+                        {
+                            entity.Customer_Company_Id,
+                            entity.Customer_Name,
+                            entity.Customer_Email,
+                            entity.Customer_Membership_Level
+                        },
+                        commandType: CommandType.StoredProcedure);
+
+                    if (data > 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.ErrorMessage = "User not found";
+                        response.Code = 404;
+                        return NotFound(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
+        [HttpPut]
+        [Authorize]
+        [Route("UpdateCustomerState")]
+        public async Task<IActionResult> UpdateCustomerState(UserEnt entity)
+        {
+
+
+            try
+            {
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var data = await context.ExecuteAsync("UpdateCustomerState",
+                       new { entity.User_Id },
+                       commandType: CommandType.StoredProcedure);
+
+                    return Ok(data);
+
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
