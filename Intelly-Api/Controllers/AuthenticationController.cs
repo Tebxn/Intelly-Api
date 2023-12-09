@@ -333,15 +333,24 @@ namespace Intelly_Api.Controllers
         {
             ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
+
             try
             {
+
+                // Obtener el ID del usuario desde las claims
+                string userId = string.Empty;
+                _tools.ObtainClaimsID(User.Claims, ref userId);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(); // No se pudo obtener el ID del usuario
+                }
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
                     var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
                     var data = await context.ExecuteAsync("ChangePassword",
-                        new { entity.User_Id, entity.User_Password_Temp, newPassword },
+                        new { userId, entity.User_Password_Temp, newPassword }, // Utilizando el userId desencriptado
                         commandType: CommandType.StoredProcedure);
 
                     if (data != 0)
