@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Intelly_Api.Entities;
+using System.Web;
 
 namespace Intelly_Api.Implementations
 {
@@ -66,7 +67,27 @@ namespace Intelly_Api.Implementations
                 return false;
             }
         }
+        public string MakeHtmlPassRecovery(UserEnt userData, string temporalPassword)
+        {
+            try
+            {
+                string fileRoute = Path.Combine(_hostingEnvironment.ContentRootPath, "HtmlTemplates\\Contrasenna.html");
+                string htmlFile = System.IO.File.ReadAllText(fileRoute);
+                htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
+                htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
+                htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
+                string hashedId = Encrypt(userData.User_Id.ToString());
+                string encodedHashedId = HttpUtility.UrlEncode(hashedId);
+                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7009/Authentication/UpdateNewPassword?q=" + encodedHashedId);
 
+
+                return htmlFile;
+            }
+            catch (Exception ex)
+            {
+                return "Error";
+            }
+        }
         public string MakeHtmlNewUser(UserEnt userData, string temporalPassword)
         {
             try

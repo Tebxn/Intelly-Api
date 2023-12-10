@@ -16,5 +16,6 @@ namespace Intelly_Api.Interfaces
         string Decrypt(string texto);
         public void ObtainClaims(IEnumerable<Claim> values, ref string userId, ref string userType,ref bool isAdmin);
         public void ObtainClaimsID(IEnumerable<Claim> values, ref string userId);
+        public string MakeHtmlPassRecovery(UserEnt userData, string temporalPassword);
     }
 }
