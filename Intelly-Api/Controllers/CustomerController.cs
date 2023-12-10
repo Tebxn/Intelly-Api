@@ -25,24 +25,17 @@ namespace Intelly_Api.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("GetAllCustomers/{Customer_Company_Id}")] //Get all cutomers from x company, please provide company id
+        [Route("GetAllCustomers/{Customer_Company_Id}")] 
         public async Task<IActionResult> GetAllCustomers(string Customer_Company_Id)
         {
             ApiResponse<List<CustomerEnt>> response = new ApiResponse<List<CustomerEnt>>();
 
             try
             {
-                string userToken = string.Empty;
-                string userType = string.Empty;
-                bool isAdmin = false;
-                _tools.ObtainClaims(User.Claims, ref userToken, ref userType, ref isAdmin);
-
-                if (!isAdmin)
-
-                    return Unauthorized();
+            
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var data = await context.QueryAsync<CustomerEnt>("GetAllCustomers", //Need SP
+                    var data = await context.QueryAsync<CustomerEnt>("GetAllCustomers", 
                         new { Customer_Company_Id }, commandType: CommandType.StoredProcedure);
 
                     if (data != null)
