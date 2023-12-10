@@ -103,7 +103,7 @@ namespace Intelly_Api.Controllers
                     string body = _tools.MakeHtmlNewUser(entity, randomPassword);
                     string recipient = entity.User_Email;
 
-                    bool emailIsSend = _tools.SendEmail(recipient, "Intelly New Account", body);
+                    bool emailIsSend = _tools.SendEmail(recipient, "New Account", body);
                     if (emailIsSend)
                     {
                         var data = await context.ExecuteAsync("RegisterAccount",

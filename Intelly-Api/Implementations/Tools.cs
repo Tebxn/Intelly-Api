@@ -44,7 +44,7 @@ namespace Intelly_Api.Implementations
                 var message = new MimeMessage();
                 string emailSender = _configuration["Email:SenderAddress"];
                 string emailSenderPassword = _configuration["Email:SenderPassword"];
-                message.From.Add(new MailboxAddress("Intelly TI Support", emailSender));
+                message.From.Add(new MailboxAddress("TEST SENDER", emailSender));
                 message.To.Add(new MailboxAddress("Recipient", recipient));
                 message.Subject = subject;
                 
@@ -60,13 +60,37 @@ namespace Intelly_Api.Implementations
                     client.Send(message);
                     client.Disconnect(true);
                 }
+
                 return true;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error al enviar el correo: {ex}");
+                // O podrías registrar la excepción en un sistema de registro
+                // logger.LogError($"Error al enviar el correo: {ex}");
                 return false;
             }
         }
+        public string MakeHtmlNewUser(UserEnt userData, string tempPassword)
+        {
+            try
+            {
+                string fileRoute = Path.Combine(_hostingEnvironment.ContentRootPath, "HtmlTemplates\\activationCode.html");
+                string htmlFile = System.IO.File.ReadAllText(fileRoute);
+                htmlFile = htmlFile.Replace("@@nickname", userData.User_Name);
+                htmlFile = htmlFile.Replace("@@activationCode", tempPassword);
+                string hashedId = Encrypt(userData.User_Id.ToString());
+                string encodedHashedId = HttpUtility.UrlEncode(hashedId);
+                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7009/Authentication/ActivateAccount?q=" + encodedHashedId);
+
+                return htmlFile;
+            }
+            catch (Exception ex)
+            {
+                return "Error";
+            }
+        }
+
         public string MakeHtmlPassRecovery(UserEnt userData, string temporalPassword)
         {
             try
@@ -81,24 +105,6 @@ namespace Intelly_Api.Implementations
                 htmlFile = htmlFile.Replace("@@Link", "https://localhost:7009/Authentication/UpdateNewPassword?q=" + encodedHashedId);
 
 
-                return htmlFile;
-            }
-            catch (Exception ex)
-            {
-                return "Error";
-            }
-        }
-        public string MakeHtmlNewUser(UserEnt userData, string temporalPassword)
-        {
-            try
-            {
-                string fileRoute = Path.Combine(_hostingEnvironment.ContentRootPath, "HtmlTemplates\\TemporalPassword.html");
-                string htmlFile = System.IO.File.ReadAllText(fileRoute);
-                htmlFile = htmlFile.Replace("@@Nombre", userData.User_Name);
-                htmlFile = htmlFile.Replace("@@Apellido", userData.User_LastName);
-                htmlFile = htmlFile.Replace("@@TemporalPassword", temporalPassword);
-                htmlFile = htmlFile.Replace("@@Link", "https://localhost:7261/Authentication/ChangePassword?q=" + Encrypt(userData.User_Id.ToString()));
-                
                 return htmlFile;
             }
             catch (Exception ex)

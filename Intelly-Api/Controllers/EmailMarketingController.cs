@@ -179,8 +179,6 @@ namespace Intelly_Api.Controllers
                         new { entity.MarketingCampaign_CompanyId, marketingCampaign.MarketingCampaign_MembershipLevel},
                         commandType: CommandType.StoredProcedure);
 
-                    if (customers.Any())
-                    {
                         string emailBodyTemplate = _tools.MakeHtmlEmailAdvertisement(entity.Email.Body, entity.Email.ImageUrl);
                         foreach (var customer in customers)
                         {
@@ -192,17 +190,9 @@ namespace Intelly_Api.Controllers
                                 return BadRequest(response);
                             }
                         }
-
                         response.Success = true;
                         response.Data = "Success";
                         return Ok(response);
-                    }
-                    else
-                    {
-                        response.Success = false;
-                        response.Data = "No customers found for the marketing campaign.";
-                        return BadRequest(response);
-                    }
                 }
             }
             catch (SqlException ex)
