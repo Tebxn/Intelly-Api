@@ -59,9 +59,7 @@ namespace Intelly_Api.Controllers
 
             try
             {
-                string decryptedUserId = _tools.Decrypt(userId);
-
-                if (long.TryParse(decryptedUserId, out long parsedUserId))
+                if (long.TryParse(userId, out long parsedUserId))
                 {
                     using (var context = _connectionProvider.GetConnection())
                     {
