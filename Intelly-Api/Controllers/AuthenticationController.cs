@@ -12,6 +12,7 @@ using System.Data.Common;
 using BCrypt.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Intelly_Api.Controllers
 {
@@ -168,8 +169,8 @@ namespace Intelly_Api.Controllers
 
                     if (data != null)
                     {
-                        string body = "Your new password to access Intelly CRM is: " + temporalPassword +
-                            "\nPlease log in with your new password and change it.";
+                        string body = "<p>Your new password to access Intelly CRM is: " + temporalPassword +
+                            "\nPlease log in with your new password and change it.</p>";
                         string recipient = entity.User_Email;
                         _tools.SendEmail(recipient, "Intelly Recover Account", body);
 
@@ -193,254 +194,50 @@ namespace Intelly_Api.Controllers
             }
         }
 
-        //[HttpPut]
-        //[Authorize]
-        //[Route("DisableAccount")]
-        //public async Task<IActionResult> DisableAccount(UserEnt entity)
-        //{
-        //    ApiResponse<string> response = new ApiResponse<string>();
-
-        //    try
-        //    {
-        //        if (entity.User_Id == 0)
-        //        {
-        //            response.ErrorMessage = "User_Id can't be empty.";
-        //            response.Code = 400;
-        //            return BadRequest(response);
-        //        }
-
-        //        using (var context = _connectionProvider.GetConnection())
-        //        {
-        //            var data = await context.ExecuteAsync("DisableAccount",
-        //                new { entity.User_Id },
-        //                commandType: CommandType.StoredProcedure);
-
-        //            if (data > 0)
-        //            {
-        //                response.Success = true;
-        //                response.Code = 200;
-        //                return Ok(response);
-        //            }
-        //            else
-        //            {
-        //                response.Code = 500;
-        //                response.ErrorMessage = "Error disabling account";
-        //                return BadRequest(response);
-        //            }
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        response.Code = 500;
-        //        return BadRequest(response);
-        //    }
-        //}
-
-        //[HttpPut]
-        //[Authorize]
-        //[Route("ActivateAccount")]
-        //public async Task<IActionResult> ActivateAccount(int User_Id)
-        //{
-        //    ApiResponse<string> response = new ApiResponse<string>();
-
-        //    try
-        //    {
-        //        if (User_Id == 0)
-        //        {
-        //            response.ErrorMessage = "User_Id can't be empty.";
-        //            response.Code = 400;
-        //            return BadRequest(response);
-        //        }
-
-        //        using (var context = _connectionProvider.GetConnection())
-        //        {
-        //            var data = await context.ExecuteAsync("ActivateAccount",
-        //                new { User_Id = User_Id },
-        //                commandType: CommandType.StoredProcedure);
-
-        //            if (data > 0)
-        //            {
-        //                response.Success = true;
-        //                response.Code = 200;
-        //                return Ok(response);
-        //            }
-        //            else
-        //            {
-        //                response.Code = 500;
-        //                response.ErrorMessage = "Error activating account";
-        //                return BadRequest(response);
-        //            }
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        response.Code = 500;
-        //        return BadRequest(response);
-        //    }
-        //}
 
 
-        //[HttpPut]
-        //[Authorize]
-        //[Route("UpdateUserPassword")]
-        //public async Task<IActionResult> UpdateUserPassword(UserEnt entity)
-        //{
-        //    ApiResponse<string> response = new ApiResponse<string>();
+        [HttpPut]
+        [AllowAnonymous]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(UserEnt entity)
+        {
+            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
 
-        //    try
-        //    {
-        //        if (entity.User_Password == null)
-        //        {
-        //            response.ErrorMessage = "Email can't be empty.";
-        //            response.Code = 400;
-        //            return BadRequest(response);
-        //        }
-        //        long UserId = long.Parse(_tools.Decrypt(User.Identity.Name.ToString()));
+            try
+            {
+                if (string.IsNullOrEmpty(entity.User_Password))
+                {
+                    return BadRequest();
+                }
+                using (var context = _connectionProvider.GetConnection())
+                {
+                    var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
 
-        //        using (var context = _connectionProvider.GetConnection())
-        //        {
-        //            var hashedPassword = _bCryptHelper.HashPassword(entity.User_Password);
+                    var data = await context.ExecuteAsync("ChangePassword",
+                        new { User_Id = entity.User_Id, User_Password = newPassword },
+                        commandType: CommandType.StoredProcedure);
 
-        //            var data = await context.QueryFirstOrDefaultAsync<UserEnt>("UpdateUserPassword",
-        //                new { entity.User_Id, hashedPassword},
-        //                commandType: CommandType.StoredProcedure);
-
-        //            if (data != null)
-        //            {
-        //                response.Success = true;
-        //                response.Code = 200;
-        //                return Ok(response);
-        //            }
-        //            else
-        //            {
-        //                response.Code = 500;
-        //                response.ErrorMessage = "Error updating password";
-        //                return BadRequest(response);
-        //            }
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        response.Code = 500;
-        //        return BadRequest(response);
-        //    }
-        //}
-
-        //[HttpPut]
-        //[AllowAnonymous]
-        //[Route("ChangePassword")]
-        //public async Task<IActionResult> ChangePassword(UserEnt entity)
-        //{
-        //    ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
-
-
-        //    try
-        //    {
-
-        //        // Obtener el ID del usuario desde las claims
-        //        string userId = string.Empty;
-        //        _tools.ObtainClaimsID(User.Claims, ref userId);
-
-        //        if (string.IsNullOrEmpty(userId))
-        //        {
-        //            return Unauthorized(); // No se pudo obtener el ID del usuario
-        //        }
-        //        using (var context = _connectionProvider.GetConnection())
-        //        {
-        //            var newPassword = _bCryptHelper.HashPassword(entity.User_Password);
-
-        //            var data = await context.ExecuteAsync("ChangePassword",
-        //                new { userId, entity.User_Password_Temp, newPassword }, // Utilizando el userId desencriptado
-        //                commandType: CommandType.StoredProcedure);
-
-        //            if (data != 0)
-        //            {
-        //                response.Success = true;
-        //                response.Code = 200;
-        //                return Ok(response);
-        //            }
-        //            else
-        //            {
-        //                response.Code = 500;
-        //                response.ErrorMessage = "Error changing password";
-        //                return BadRequest(response);
-        //            }
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        response.Code = 500;
-        //        return BadRequest(response);
-        //    }
-        //}
-
-        //[HttpPut]
-        //[AllowAnonymous]
-        //[Route("UpdateNewPassword")]
-        //public async Task<IActionResult> UpdateNewPassword(UserEnt entity)
-        //{
-        //    ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
-
-        //    try
-        //    {
-        //        using (var connection = _connectionProvider.GetConnection())
-        //        {
-        //            entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
-
-        //            var getPass = await connection.QueryFirstOrDefaultAsync<UserEnt>("GetEncryptedPass",
-        //                 new { entity.User_Id },
-        //                 commandType: CommandType.StoredProcedure);
-
-        //            if (getPass != null)
-        //            {
-        //                getPass.User_Password = _tools.Decrypt(getPass.User_Password);
-        //                if (getPass.User_Password != entity.User_Password_Temp)
-        //                {
-        //                    response.ErrorMessage = "La contraseña temporal proporcionada no es valida";
-        //                    response.Code = 500;
-        //                    return BadRequest(response);
-        //                }
-        //                else
-        //                {
-        //                    entity.User_Password = _tools.Encrypt(entity.User_Password);
-
-        //                    var data = await connection.ExecuteAsync("ChangePassword",
-        //                        new { entity.User_Id, entity.User_Password },
-        //                        commandType: CommandType.StoredProcedure);
-
-        //                    if (data != 0)
-        //                    {
-        //                        response.Success = true;
-        //                        response.Code = 200;
-        //                        return Ok(response);
-        //                    }
-        //                    else
-        //                    {
-        //                        response.ErrorMessage = "Error al actualizar su contraseña nueva";
-        //                        response.Code = 500;
-        //                        return BadRequest(response);
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                response.ErrorMessage = "Error al actualizar su contraseña nueva";
-        //                response.Code = 500;
-        //                return BadRequest(response);
-        //            }
-
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        return BadRequest(response);
-        //    }
-        //}
+                    if (data != 0)
+                    {
+                        response.Success = true;
+                        response.Code = 200;
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Code = 500;
+                        response.ErrorMessage = "Error changing password";
+                        return BadRequest(response);
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                response.ErrorMessage = "Unexpected Error: " + ex.Message;
+                response.Code = 500;
+                return BadRequest(response);
+            }
+        }
 
         [HttpPost]
         [AllowAnonymous]
@@ -461,17 +258,19 @@ namespace Intelly_Api.Controllers
                 using (var connection = _connectionProvider.GetConnection())
                 {
                     var data = await connection.QueryFirstOrDefaultAsync<UserEnt>("PwdRecovery",
-                        new { entity.User_Email },
+                        new { entity.User_Email},
                         commandType: CommandType.StoredProcedure);
 
 
                     if (data != null)
                     {
                         var randomPassword = _tools.GenerateRandomCode(8);
-                        var hashedPassword = _tools.Encrypt(randomPassword);
+                        var hashedPassword = _bCryptHelper.HashPassword(randomPassword);
                         entity.User_Password = hashedPassword;
 
-                        string body = _tools.MakeHtmlPassRecovery(data, randomPassword);
+                        //string body = _tools.MakeHtmlPassRecovery(data, randomPassword);
+                        string body = "<h2>Recuperacion de contraseña Intelly CRM</h2><br><p>Para ingresar nuevamente a " +
+                            "tu cuenta debes loguearte con la siguiente contraseña temporal: <b>"+randomPassword+"</b><p>";
                         string recipient = entity.User_Email;
 
                         var updatePass = await connection.ExecuteAsync("UpdateTempPassword",
@@ -519,71 +318,6 @@ namespace Intelly_Api.Controllers
                 return BadRequest(response);
             }
         }
-
-        [HttpPut]
-        [AllowAnonymous]
-        [Route("UpdateNewPassword")]
-        public async Task<IActionResult> UpdateNewPassword(UserEnt entity)
-        {
-            ApiResponse<UserEnt> response = new ApiResponse<UserEnt>();
-
-            try
-            {
-                using (var connection = _connectionProvider.GetConnection())
-                {
-                    entity.User_Id = long.Parse(_tools.Decrypt(entity.User_Secure_Id));
-
-                    var getPass = await connection.QueryFirstOrDefaultAsync<UserEnt>("GetEncryptedPass",
-                         new { entity.User_Id },
-                         commandType: CommandType.StoredProcedure);
-
-                    if (getPass != null)
-                    {
-                        getPass.User_Password = _tools.Decrypt(getPass.User_Password);
-                        if (getPass.User_Password != entity.User_Password_Temp)
-                        {
-                            response.ErrorMessage = "La contraseña temporal proporcionada no es valida";
-                            response.Code = 500;
-                            return BadRequest(response);
-                        }
-                        else
-                        {
-                            entity.User_Password = _tools.Encrypt(entity.User_Password);
-
-                            var data = await connection.ExecuteAsync("UpdateNewPassword",
-                                new { entity.User_Id, entity.User_Password },
-                                commandType: CommandType.StoredProcedure);
-
-                            if (data != 0)
-                            {
-                                response.Success = true;
-                                response.Code = 200;
-                                return Ok(response);
-                            }
-                            else
-                            {
-                                response.ErrorMessage = "Error al actualizar su contraseña nueva";
-                                response.Code = 500;
-                                return BadRequest(response);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        response.ErrorMessage = "Error al actualizar su contraseña nueva";
-                        response.Code = 500;
-                        return BadRequest(response);
-                    }
-
-                }
-            }
-            catch (SqlException ex)
-            {
-                response.ErrorMessage = "Unexpected Error: " + ex.Message;
-                return BadRequest(response);
-            }
-        }
-
     }
 }
 

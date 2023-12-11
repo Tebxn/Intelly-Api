@@ -208,48 +208,6 @@ namespace Intelly_Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        //[HttpPut]
-        //[AllowAnonymous]
-        //[Route("DisableSpecificUser")]
-        //public async Task<IActionResult> DisableSpecificUser(UserEnt entity)
-        //{
-        //    ApiResponse<string> response = new ApiResponse<string>();
-        //    try
-        //    {
-        //        if (entity.User_Id == 0)
-        //        {
-        //            response.ErrorMessage = "Company Id can't be empty.";
-        //            response.Code = 400;
-        //            return BadRequest(response);
-        //        }
-        //        using (var context = _connectionProvider.GetConnection())
-        //        {
-        //            var data = await context.ExecuteAsync("DisableSpecificUser",
-        //                new { entity.User_Id },
-        //                commandType: CommandType.StoredProcedure);
-
-        //            if (data != 0)
-        //            {
-        //                response.Success = true;
-        //                response.Code = 200;
-        //                return Ok(response);
-        //            }
-        //            else
-        //            {
-        //                response.Code = 500;
-        //                response.ErrorMessage = "Error changing user state";
-        //                return BadRequest(response);
-        //            }
-        //        }
-        //    }
-        //    catch (SqlException ex)
-        //    {
-        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
-        //        response.Code = 500;
-        //        return BadRequest(response);
-        //    }
-        //}
     }
 }
 
