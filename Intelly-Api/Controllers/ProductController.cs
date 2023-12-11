@@ -88,8 +88,47 @@ namespace Intelly_Api.Controllers
             }
         }
 
+        //[HttpGet]
+        //[AllowAnonymous]
+        //[Route("GetSpecificProduct/{ProductId}")]
+        //public async Task<IActionResult> GetSpecificProduct(long ProductId)
+        //{
+        //    ApiResponse<ProductEnt> response = new ApiResponse<ProductEnt>();
+
+        //    try
+        //    {
+        //        using (var context = _connectionProvider.GetConnection())
+        //        {
+        //            var companyData = await context.QueryFirstOrDefaultAsync<ProductEnt>("GetSpecificProduct",
+        //                new { Product_Id = ProductId }, commandType: CommandType.StoredProcedure);
+
+        //            if (companyData != null)
+        //            {
+        //                response.Success = true;
+        //                response.Data = companyData;
+
+        //                return Ok(response);
+        //            }
+        //            else
+        //            {
+        //                response.ErrorMessage = "Company not found";
+        //                response.Code = 404;
+
+        //                return NotFound(response);
+        //            }
+        //        }
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        response.ErrorMessage = "Unexpected Error: " + ex.Message;
+        //        response.Code = 500;
+
+        //        return BadRequest(response);
+        //    }
+        //}
+
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         [Route("GetSpecificProduct/{ProductId}")]
         public async Task<IActionResult> GetSpecificProduct(long ProductId)
         {
@@ -97,22 +136,21 @@ namespace Intelly_Api.Controllers
 
             try
             {
-
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    var companyData = await context.QueryFirstOrDefaultAsync<ProductEnt>("GetSpecificProduct",
+                    var localData = await context.QueryFirstOrDefaultAsync<ProductEnt>("GetSpecificProduct",
                         new { ProductId }, commandType: CommandType.StoredProcedure);
 
-                    if (companyData != null)
+                    if (localData != null)
                     {
                         response.Success = true;
-                        response.Data = companyData;
+                        response.Data = localData;
 
                         return Ok(response);
                     }
                     else
                     {
-                        response.ErrorMessage = "Company not found";
+                        response.ErrorMessage = "Local not found";
                         response.Code = 404;
 
                         return NotFound(response);
@@ -123,9 +161,9 @@ namespace Intelly_Api.Controllers
             {
                 response.ErrorMessage = "Unexpected Error: " + ex.Message;
                 response.Code = 500;
-
                 return BadRequest(response);
             }
+
         }
 
         [HttpPut]
@@ -147,8 +185,7 @@ namespace Intelly_Api.Controllers
                             entity.Product_CompanyId,
                             entity.Product_Internal_Code,
                             entity.Product_Name,
-                            entity.Product_Price,
-                            entity.Product_ImageUrl
+                            entity.Product_Price  
                         },
                         commandType: CommandType.StoredProcedure);
 
