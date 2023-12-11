@@ -179,7 +179,8 @@ namespace Intelly_Api.Controllers
                         new { entity.MarketingCampaign_CompanyId, marketingCampaign.MarketingCampaign_MembershipLevel},
                         commandType: CommandType.StoredProcedure);
 
-                        string emailBodyTemplate = _tools.MakeHtmlEmailAdvertisement(entity.Email.Body, entity.Email.ImageUrl);
+                    //string emailBodyTemplate = _tools.MakeHtmlEmailAdvertisement(entity.Email.Body, entity.Email.ImageUrl);
+                    string emailBodyTemplate = "<p>"+ entity.Email.Body + "</p><br><img src="+ entity.Email.ImageUrl + ">";
                         foreach (var customer in customers)
                         {
                             bool emailIsSend = _tools.SendEmail(customer.Customer_Email, "NOMBRE EMPRESA", emailBodyTemplate);

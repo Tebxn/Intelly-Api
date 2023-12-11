@@ -100,7 +100,10 @@ namespace Intelly_Api.Controllers
 
                 using (var context = _connectionProvider.GetConnection())
                 {
-                    string body = _tools.MakeHtmlNewUser(entity, randomPassword);
+                    //string body = _tools.MakeHtmlNewUser(entity, randomPassword);
+
+                    string body = "<p>Bienvenido " + entity.User_Name + " Su password temporal es: <b>" + randomPassword + "</b></p>";
+
                     string recipient = entity.User_Email;
 
                     bool emailIsSend = _tools.SendEmail(recipient, "New Account", body);
